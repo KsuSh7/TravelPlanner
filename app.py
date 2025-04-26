@@ -10,7 +10,7 @@ from flask_jwt_extended import JWTManager
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Duplik64!@localhost:5432/travelplanner'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'Dupl!k64'
 jwt = JWTManager(app)
