@@ -1,25 +1,17 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from models import db
-from routes.auth import auth_bp
-from routes.trips import trips_bp
-from routes.filters import filters_bp
-from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Duplik64!@localhost:5432/travelplanner'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'Dupl!k64'
-jwt = JWTManager(app)
+app.config['SECRET_KEY'] = 'Dupl!k64'
 
-db.init_app(app)
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
-app.register_blueprint(auth_bp)
-app.register_blueprint(trips_bp)
-app.register_blueprint(filters_bp)
+from models import User, Trip, BudgetCategory, DailyPlan
 
 with app.app_context():
     db.create_all()
