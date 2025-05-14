@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import FutureTrips from './FutureTrips';
 import LoginScreen from './LoginScreen';
 import SignUpScreen from './SignUpScreen';
+import MapScreen from './MapScreen';  
 
 const Tab = createBottomTabNavigator();
 
@@ -22,8 +23,8 @@ export default function BottomTabs() {
             iconName = 'airplane-outline';
           } else if (route.name === 'Login') {
             iconName = 'log-in-outline';
-          } else if (route.name === 'SignUp') {
-            iconName = 'person-add-outline';
+          } else if (route.name === 'Map') {
+            iconName = 'map-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -34,7 +35,7 @@ export default function BottomTabs() {
     >
       <Tab.Screen name="FutureTrips" component={FutureTrips} />
       <Tab.Screen name="Login" component={LoginScreen} />
-      <Tab.Screen name="SignUp" component={SignUpScreen} />
+      <Tab.Screen name="Map" component={MapScreen} />
     </Tab.Navigator>
   );
 }

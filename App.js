@@ -1,5 +1,3 @@
-// App.js
-
 import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -7,7 +5,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import WelcomeScreen from './screen/WelcomeScreen';
 import SignUpScreen from './screen/SignUpScreen';
 import LoginScreen from './screen/LoginScreen';
-import BottomTabs from './screen/BottomTabs'; // У цьому компоненті вже буде FutureTrips
+import MapScreen from './screen/MapScreen';
+import BottomTabs from './screen/BottomTabs';
+
 
 const Stack = createStackNavigator();
 
@@ -26,8 +26,7 @@ export default function App() {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
-        
-        {/* Після логіну або реєстрації відкриваємо вкладки */}
+        <Stack.Screen name="Map" component={MapScreen} />
         <Stack.Screen name="MainTabs" component={BottomTabs} />
       </Stack.Navigator>
     </NavigationContainer>
