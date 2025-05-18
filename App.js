@@ -1,13 +1,13 @@
 import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-
 import WelcomeScreen from './screen/WelcomeScreen';
 import SignUpScreen from './screen/SignUpScreen';
 import LoginScreen from './screen/LoginScreen';
 import MapScreen from './screen/MapScreen';
 import BottomTabs from './screen/BottomTabs';
-
+import ProfileScreen from './screen/ProfileScreen';
+import SpentScreen from './screen/SpentScreen';
 
 const Stack = createStackNavigator();
 
@@ -27,6 +27,8 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Map" component={MapScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Spent" component={SpentScreen} />
         <Stack.Screen name="MainTabs" component={BottomTabs} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -16,16 +16,11 @@ export default function SignUpScreen({ navigation }) {
         <TextInput style={styles.input} placeholder="Name" placeholderTextColor="#94D2FF" />
         <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#94D2FF" />
         <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#94D2FF" />
+        <TextInput style={styles.input} placeholder="Repeat Password" secureTextEntry placeholderTextColor="#94D2FF" />
 
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-                      style={styles.button} 
-                      onPress={() => navigation.navigate('MainTabs', { screen: 'FutureTrips' })}
-                    >
-                      <Text style={styles.addButtonText}>Yes</Text>
-          </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
           <Text style={styles.footerText}>Already have an account? <Text style={{ fontWeight: 'bold' }}>Login</Text></Text>

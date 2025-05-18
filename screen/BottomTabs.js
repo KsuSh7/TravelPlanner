@@ -5,8 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import FutureTrips from './FutureTrips';
-import LoginScreen from './LoginScreen';
-import SignUpScreen from './SignUpScreen';
+import SpentScreen from './SpentScreen';
+import ProfileScreen from './ProfileScreen';
 import MapScreen from './MapScreen';  
 
 const Tab = createBottomTabNavigator();
@@ -21,10 +21,12 @@ export default function BottomTabs() {
 
           if (route.name === 'FutureTrips') {
             iconName = 'airplane-outline';
-          } else if (route.name === 'Login') {
-            iconName = 'log-in-outline';
           } else if (route.name === 'Map') {
             iconName = 'map-outline';
+          } else if (route.name==='Profile'){
+            iconName='person-outline';
+          }else if (route.name=='Spent'){
+            iconName='cash-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -34,8 +36,10 @@ export default function BottomTabs() {
       })}
     >
       <Tab.Screen name="FutureTrips" component={FutureTrips} />
-      <Tab.Screen name="Login" component={LoginScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Spent" component={SpentScreen} />
+
     </Tab.Navigator>
   );
 }
