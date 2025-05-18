@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, date
-from app import db
-from models import Trip, BudgetCategory, DailyPlan
+from extensions import db
+from models import Trip, BudgetCategory
 
 trips_bp = Blueprint('trips', __name__, url_prefix='/api')
 
@@ -24,7 +24,6 @@ def get_trips():
             'notes': t.notes,
             'status': t.status,
             'budgets': [{'category': b.category, 'amount': b.amount} for b in t.budgets],
-            'plans': [{'date': p.date.isoformat(), 'note': p.note, 'planned_budget': p.planned_budget} for p in t.plans]
         } for t in trips
     ])
 

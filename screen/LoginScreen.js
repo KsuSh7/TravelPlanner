@@ -17,26 +17,34 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch('http://192.168.31.54:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        await saveToken(data.token);
-        navigation.navigate('MainTabs', { screen: 'FutureTrips' });
-      } else {
-        alert(data.message || 'Login failed');
+  
+      const text = await response.text();  // Замість json, спочатку подивимось текст
+      console.log('Response text:', text);
+  
+      // Спробуємо парсити JSON, якщо можливо
+      try {
+        const data = JSON.parse(text);
+        if (response.ok) {
+          await saveToken(data.token);
+          navigation.navigate('MainTabs', { screen: 'FutureTrips' });
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (e) {
+        alert('Server returned invalid JSON');
+        console.error('JSON parse error:', e);
       }
     } catch (err) {
       console.error('Login error:', err);
       alert('Something went wrong');
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.titleTop}>Login to continue</Text>

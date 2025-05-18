@@ -23,17 +23,9 @@ class Trip(db.Model):
     status = db.Column(db.String(20), default='заплановано')
 
     budgets = db.relationship('BudgetCategory', backref='trip', lazy=True, cascade="all, delete-orphan")
-    plans = db.relationship('DailyPlan', backref='trip', lazy=True, cascade="all, delete-orphan")
 
 class BudgetCategory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'), nullable=False)
     category = db.Column(db.String(50))
     amount = db.Column(db.Float)
-
-class DailyPlan(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    note = db.Column(db.Text)
-    planned_budget = db.Column(db.Float)
