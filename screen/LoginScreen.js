@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const saveToken = async (token) => {
+    try {
+      await AsyncStorage.setItem('authToken', token);
+      console.log('Token saved');
+    } catch (e) {
+      console.error('Failed to save token:', e);
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await saveToken(data.token);
+        navigation.navigate('MainTabs', { screen: 'FutureTrips' });
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      alert('Something went wrong');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.titleTop}>Login to continue</Text>
@@ -11,20 +46,20 @@ export default function LoginScreen({ navigation }) {
       <TextInput 
         style={styles.input} 
         placeholder="Email" 
-        placeholderTextColor="#94D2FF" 
+        placeholderTextColor="#94D2FF"
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput 
         style={styles.input} 
         placeholder="Password" 
         secureTextEntry 
-        placeholderTextColor="#94D2FF" 
+        placeholderTextColor="#94D2FF"
+        value={password}
+        onChangeText={setPassword}
       />
 
-      {/* Виправлення тут — закриваємо дужку правильно */}
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => navigation.navigate('MainTabs', { screen: 'FutureTrips' })}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
