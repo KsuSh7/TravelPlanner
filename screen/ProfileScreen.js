@@ -11,7 +11,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.title}>My Account</Text>
             <Image source={require('../assets/littleplane.png')} style={styles.littleplane} />
         </View>
-        //це потрібно зробити так щоб вивести інформацію про користувача або щось типу того
+        
         <TextInput style={styles.input} placeholder="Name" placeholderTextColor="#94D2FF" />
         <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#94D2FF" />
 

@@ -5,7 +5,7 @@ import { registerUser, loginUser } from '../utils/api'; // тут твій фа�
 const screenWidth = Dimensions.get('window').width;
 
 export default function SignUpScreen({ navigation }) {
-  const [name, setName] = useState('');
+  const [username, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
@@ -15,25 +15,29 @@ export default function SignUpScreen({ navigation }) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
+  
     try {
-      const registerResponse = await registerUser(name, email, password);
-      if (registerResponse.success) {
-        // Автоматичний логін після успішної реєстрації
-        const loginResponse = await loginUser(email, password);
-        if (loginResponse.success) {
-          // Збережи токен або інші дані, якщо потрібно (AsyncStorage тощо)
-          // Перейти на головний екран або інший
-          navigation.navigate('Home'); // заміни 'Home' на назву твого екрану після логіну
-        } else {
-          Alert.alert('Login failed', loginResponse.message || 'Unable to login');
-        }
+      const registerResponse = await registerUser(username, email, password);
+      console.log('Register response:', registerResponse);
+  
+      if (registerResponse.token) {
+        // Якщо отримали токен, зберігаємо і переходимо далі
+        saveToken(registerResponse.token);
+        Alert.alert('Success', 'Registration successful!');
+        navigation.navigate('Home');
+      } else if (registerResponse.message) {
+        // Якщо токена немає, але є повідомлення від сервера
+        Alert.alert('Success', registerResponse.message);
+        // Тут можна, наприклад, направити користувача на екран логіну
+        navigation.navigate('Login');
       } else {
-        Alert.alert('Registration failed', registerResponse.message || 'Unable to register');
+        // Якщо нічого немає — просто підтверджуємо успіх
+        Alert.alert('Success', 'Registration successful!');
+        navigation.navigate('Home');
       }
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong');
-      console.error(error);
+      console.error('Register error:', error);
+      Alert.alert('Registration failed', error.message || 'Something went wrong');
     }
   };
 
@@ -51,7 +55,7 @@ export default function SignUpScreen({ navigation }) {
           style={styles.input}
           placeholder="Name"
           placeholderTextColor="#94D2FF"
-          value={name}
+          value={username}
           onChangeText={setName}
         />
         <TextInput

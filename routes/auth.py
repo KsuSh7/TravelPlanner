@@ -5,24 +5,24 @@ from flask_jwt_extended import create_access_token
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api')
 
+from sqlalchemy.exc import IntegrityError
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
+    username = data['username']
+    email = data['email']
+    password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
-    if not username or not email or not password:
-        return jsonify({"message": "Всі поля обов’язкові."}), 400
+    new_user = User(username=username, email=email, password=password)
+    db.session.add(new_user)
 
-    if User.query.filter_by(email=email).first():
-        return jsonify({"message": "Email вже існує."}), 409
-
-    hashed = bcrypt.generate_password_hash(password).decode('utf-8')
-    user = User(username=username, email=email, password=hashed)
-    db.session.add(user)
-    db.session.commit()
-    return jsonify({"message": "Реєстрація успішна."}), 201
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Registration successful'}), 201
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Username or email already exists'}), 409
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
