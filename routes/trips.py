@@ -11,6 +11,7 @@ trips_bp = Blueprint('trips', __name__, url_prefix='/api')
 def get_trips():
     user_id = get_jwt_identity()
     today = date.today()
+    # Автоматично видаляємо закінчені подорожі
     Trip.query.filter(Trip.user_id == user_id, Trip.end_date < today).delete()
     db.session.commit()
 
@@ -23,6 +24,8 @@ def get_trips():
             'end_date': t.end_date.isoformat(),
             'notes': t.notes,
             'status': t.status,
+            'latitude': getattr(t, 'latitude', None),
+            'longitude': getattr(t, 'longitude', None),
             'budgets': [{'category': b.category, 'amount': b.amount} for b in t.budgets],
         } for t in trips
     ])
@@ -32,12 +35,15 @@ def get_trips():
 def create_trip():
     data = request.get_json()
     user_id = get_jwt_identity()
+
     trip = Trip(
         user_id=user_id,
         location=data['location'],
         start_date=datetime.strptime(data['start_date'], '%Y-%m-%d'),
         end_date=datetime.strptime(data['end_date'], '%Y-%m-%d'),
-        notes=data.get('notes')
+        notes=data.get('notes'),
+        latitude=data.get('latitude'),
+        longitude=data.get('longitude')
     )
     db.session.add(trip)
     db.session.commit()
@@ -55,5 +61,8 @@ def edit_trip(trip_id):
     trip.start_date = datetime.strptime(data.get('start_date', trip.start_date.isoformat()), '%Y-%m-%d')
     trip.end_date = datetime.strptime(data.get('end_date', trip.end_date.isoformat()), '%Y-%m-%d')
     trip.notes = data.get('notes', trip.notes)
+    trip.latitude = data.get('latitude', trip.latitude)
+    trip.longitude = data.get('longitude', trip.longitude)
+
     db.session.commit()
     return jsonify({"message": "Подорож оновлено."}), 200

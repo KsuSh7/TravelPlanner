@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from extensions import db, bcrypt
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
 
 app = Flask(__name__)
@@ -15,7 +16,7 @@ db.init_app(app)
 bcrypt.init_app(app)
 jwt = JWTManager()
 jwt.init_app(app)
-
+migrate = Migrate(app, db)
 
 with app.app_context():
     from models import User, Trip, BudgetCategory

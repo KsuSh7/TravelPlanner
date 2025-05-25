@@ -1,11 +1,18 @@
 from extensions import db, bcrypt
 from datetime import date
+from sqlalchemy.orm import validates
+import enum
+from sqlalchemy import Enum
 
 class User(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+    trips = db.relationship('Trip', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -14,18 +21,43 @@ class User(db.Model):
         return bcrypt.check_password_hash(self.password, password)
 
 class Trip(db.Model):
+    __tablename__ = 'trips'
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    location = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    city_id = db.Column(db.Integer, db.ForeignKey('cities.id'), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     notes = db.Column(db.Text)
     status = db.Column(db.String(20), default='заплановано')
 
     budgets = db.relationship('BudgetCategory', backref='trip', lazy=True, cascade="all, delete-orphan")
+    city = db.relationship('City', backref='trips')
+
+    @validates('end_date')
+    def validate_end_date(self, key, end_date):
+        if self.start_date and end_date < self.start_date:
+            raise ValueError("End date must be after start date")
+        return end_date
+
+class BudgetCategoryEnum(enum.Enum):
+    hotel = "готель"
+    transport = "дорога"
+    food = "їжа"
+    other = "інше"
 
 class BudgetCategory(db.Model):
+    __tablename__ = 'budget_categories'
+
     id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'), nullable=False)
-    category = db.Column(db.String(50))
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    category = db.Column(Enum(BudgetCategoryEnum), nullable=False)
     amount = db.Column(db.Float)
+
+class City(db.Model):
+    __tablename__ = 'cities'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
