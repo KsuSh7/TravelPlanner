@@ -17,7 +17,7 @@ export default function SpentScreen() {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch(`http://192.168.31.54:5000/api/expenses/${tripId}`);
+      const response = await fetch(`http://192.168.1.162:5001/api/expenses/${tripId}`);
       const data = await response.json();
       const formatted = data.map((item) => ({
         id: item.id.toString(),
@@ -40,7 +40,7 @@ export default function SpentScreen() {
     };
 
     try {
-      const response = await fetch('http://192.168.31.54:5000/api/expenses', {
+      const response = await fetch('http://192.168.1.162:5001/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newExpense),

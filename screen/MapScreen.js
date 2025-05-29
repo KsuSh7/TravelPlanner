@@ -1,54 +1,61 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, StyleSheet, Image, ActivityIndicator, Text } from 'react-native';
-
-const getUserCities = async () => {
-  return [
-    { city: 'Lviv', latitude: 49.8397, longitude: 24.0297 },
-    { city: 'Kyiv', latitude: 50.4547, longitude: 30.5238 },
-    { city: 'Odesa', latitude: 46.4825, longitude: 30.7233 },
-  ];
-};
+import { TripsContext } from './TripsContext';
 
 export default function MapScreen() {
-  const [cities, setCities] = useState(null);
+  const [staticMapUrl, setStaticMapUrl] = useState(null);
+  const [validCities, setValidCities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [trips] = useContext(TripsContext);
 
-  const accessToken = 'pk.eyJ1IjoibGVyZmZmIiwiYSI6ImNtYWlncGpvaTA1N3Myb3I5cmlxazllbDUifQ.awWDk2DDm_ac6LV7hkKAqw';
+  const accessToken = 'pk.eyJ1IjoibGVyZmZmIiwiYSI6ImNtYWlncGpvaTA1N3Myb3I5cmlxazllbDUifQ.awWDk2DDm_ac6LV7hkKAqw'; // 🔁 заміни на свій справжній Mapbox токен
   const style = 'streets-v11';
-  const zoom = 4;
+  const zoom = 3;
 
   useEffect(() => {
-    const loadCities = async () => {
-      const data = await getUserCities();
-      setCities(data);
-    };
-    loadCities();
-  }, []);
+    const filtered = trips.filter(t => t.latitude && t.longitude);
+    setValidCities(filtered);
 
-  if (!cities) {
+    if (filtered.length === 0) {
+      setStaticMapUrl(null);
+      setLoading(false);
+      return;
+    }
+
+    const markers = filtered
+      .map(t => `pin-l+ff0000(${t.longitude},${t.latitude})`)
+      .join(',');
+
+    const center = `${filtered[0].longitude},${filtered[0].latitude}`;
+
+    const url = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/${markers}/${center},${zoom}/600x400?access_token=${accessToken}`;
+
+    setStaticMapUrl(url);
+    setLoading(false);
+  }, [trips]);
+
+  if (loading) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" />
-        <Text>Завантаження міст...</Text>
+        <Text>Завантаження карти...</Text>
       </View>
     );
   }
 
-  const markers = cities
-    .map(city => `pin-l+ff0000(${city.longitude},${city.latitude})`)
-    .join(',');
-
-  const center = `${cities[0].longitude},${cities[0].latitude}`;
-
-  const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/${markers}/${center},${zoom}/600x400?access_token=${accessToken}`;
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Міста майбутніх подорожей:</Text>
-      {cities.map((c, i) => (
-        <Text key={i}>{c.city}</Text>
-      ))}
-      <Image source={{ uri: staticMapUrl }} style={styles.map} />
+      {validCities.length === 0 ? (
+        <Text>Немає міст з координатами</Text>
+      ) : (
+        <>
+          {validCities.map((trip, index) => (
+            <Text key={index}>{trip.city}</Text>
+          ))}
+          <Image source={{ uri: staticMapUrl }} style={styles.map} />
+        </>
+      )}
     </View>
   );
 }
@@ -56,6 +63,9 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', paddingTop: 40 },
   title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
-  map: { width: 300, height: 200, marginTop: 20 },
+  map: { width: 300, height: 200, marginTop: 20, borderRadius: 10 },
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
+
+  
+  

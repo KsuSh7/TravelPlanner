@@ -1,38 +1,71 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import db from '../instance/database'; // Підключення до SQLite
 
-const screenWidth=Dimensions.get('window').width;
-export default function ProfileScreen({ navigation }) {
-    return (
+export default function ProfileScreen() {
+  const [userName, setUserName] = useState('');
+  const [pastTrips, setPastTrips] = useState([]);
+
+  useEffect(() => {
+    const userId = 1; // 👈 заміни на реальний userId, якщо є авторизація
+
+    // Отримуємо ім'я користувача
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT name FROM users WHERE id = ?;',
+        [userId],
+        (_, { rows }) => {
+          if (rows.length > 0) {
+            setUserName(rows._array[0].name);
+          }
+        },
+        (_, error) => {
+          console.log('Помилка при завантаженні користувача:', error);
+        }
+      );
+    });
+
+    // Отримуємо подорожі з минулими датами
+    db.transaction(tx => {
+      const today = new Date().toISOString().split('T')[0]; // поточна дата
+      tx.executeSql(
+        'SELECT name, date FROM trips WHERE user_id = ? AND date < ? ORDER BY date DESC;',
+        [userId, today],
+        (_, { rows }) => {
+          setPastTrips(rows._array);
+        },
+        (_, error) => {
+          console.log('Помилка при завантаженні подорожей:', error);
+        }
+      );
+    });
+  }, []);
+
+  return (
     <View style={styles.container}>
-        
-        <View style={styles.myaccountcontainer}>
-        <View style={styles.rowcontainer}>
-            <Text style={styles.title}>My Account</Text>
-            <Image source={require('../assets/littleplane.png')} style={styles.littleplane} />
-        </View>
-        
-        <TextInput style={styles.input} placeholder="Name" placeholderTextColor="#94D2FF" />
-        <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#94D2FF" />
+      <Text style={styles.header}>👤 Профіль користувача</Text>
+      <Text style={styles.name}>Ім’я: {userName}</Text>
 
-        
-        </View>
-        <Image source={require('../assets/logo.png')} style={styles.logo} />
+      <Text style={styles.subheader}>🧳 Минулі подорожі:</Text>
+      <FlatList
+        data={pastTrips}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item }) => (
+          <Text style={styles.tripItem}>
+            • {item.name} — {item.date}
+          </Text>
+        )}
+        ListEmptyComponent={<Text style={styles.empty}>Немає минулих подорожей</Text>}
+      />
     </View>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#CAF0F8', alignItems: 'center' },
-    myaccountcontainer:{ flex: 1, backgroundColor: '#0077B6', alignItems: 'center', paddingTop: 60 , borderRadius:40, width:screenWidth},
-    welcome: { fontSize: 20, fontFamily:'Poppins-Bold', color: '#0077B6', marginBottom: 20, marginTop: 5},
-    logo: { width: 250, height: 200, marginBottom: 10 },
-    rowcontainer:{flexDirection:'row'},
-    title: { fontFamily:'Poppins-Bold',fontSize: 30,fontWeight: 'bold',color: '#FFFFFF',marginBottom: 20,fontFamily: 'Poppins-Bold',alignSelf: 'flex-start',marginRight: 10, marginLeft:10,            
-    },
-    littleplane:{width:80,height:80,paddingBottom:30, alignSelf: 'flex-end',marginLeft:50},
-    input: { width: '80%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10 },
-    button: {  padding: 10, width: '40%', borderRadius: 20, marginTop: 20, borderColor:'#FFFFFF' , borderWidth: 2},
-    buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-    footerText: { marginTop: 20, color: '#FFFFFF' }
+  container: { flex: 1, backgroundColor: '#F1FAEE', padding: 20 },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: '#1D3557' },
+  name: { fontSize: 18, marginBottom: 20, color: '#457B9D' },
+  subheader: { fontSize: 20, fontWeight: 'bold', marginBottom: 10, color: '#1D3557' },
+  tripItem: { fontSize: 16, paddingVertical: 5, color: '#333' },
+  empty: { fontSize: 16, fontStyle: 'italic', color: '#A8A8A8' },
 });
