@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.31.55:5001/api/login', {
+      const response = await fetch('http://192.168.1.162:5001/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -54,6 +54,9 @@ export default function LoginScreen({ navigation }) {
       <TextInput 
         style={styles.input} 
         placeholder="Email" 
+        autoCapitalize="none"
+        keyboardType="email-address"
+        autoCorrect={false}
         placeholderTextColor="#94D2FF"
         value={email}
         onChangeText={setEmail}

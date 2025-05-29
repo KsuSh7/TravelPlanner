@@ -18,7 +18,7 @@ export default function FutureTrips() {
 
   // 🗺️ Завантаження міст з бекенду
   useEffect(() => {
-    fetch('http://192.168.31.55:5001/cities') // 🔁 Замінити на свій локальний IP
+    fetch('http://192.168.1.162:5001/cities') // 🔁 Замінити на свій локальний IP
       .then(res => res.json())
       .then(data => setAllCities(data))
       .catch(err => console.error('Помилка при завантаженні міст:', err));
@@ -93,12 +93,16 @@ export default function FutureTrips() {
               selectedValue={selectedCity}
               onValueChange={(value) => setSelectedCity(value)}
               style={styles.picker}
-            >
+              itemStyle={styles.pickerItem} >
               <Picker.Item label="Оберіть місто" value="" />
-              {allCities.map((city, index) => (
-                <Picker.Item key={index} label={city.name} value={city.name} />
-              ))}
+                {allCities.map((city, index) => (
+              <Picker.Item
+                    key={index}
+                    label={city.name}
+                    value={city.name}/>
+                      ))}
             </Picker>
+
 
             <TouchableOpacity style={styles.dateButton} onPress={() => setDatePickerVisible(true)}>
               <Text style={styles.dateButtonText}>{tripDate ? `Дата: ${tripDate}` : 'Вибрати дату'}</Text>
@@ -135,7 +139,8 @@ const styles = StyleSheet.create({
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
   modalContent: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 10 },
   input: { width: '100%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10 },
-  picker: { width: '100%', backgroundColor: '#E0F7FF', borderRadius: 10, marginVertical: 10 },
+  picker: { width: '100%', backgroundColor: '#E0F7FF', borderRadius: 10, marginVertical: 10 ,color: '#1B4965'},
+  pickerItem:{color: '#1B4965'},
   dateButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10, marginVertical: 10 },
   dateButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   saveButton: { backgroundColor: '#1B4965', padding: 15, width: '100%', borderRadius: 20, marginTop: 20 },

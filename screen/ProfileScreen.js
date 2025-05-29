@@ -62,8 +62,8 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F1FAEE', padding: 20 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: '#1D3557' },
+  container: { flex: 1, backgroundColor: '#CAF0F8', padding: 20 },
+  header: { fontFamily: 'Poppins-Bold', fontSize: 24, fontWeight: 'bold', marginBottom: 10,color: '#1B4965', },
   name: { fontSize: 18, marginBottom: 20, color: '#457B9D' },
   subheader: { fontSize: 20, fontWeight: 'bold', marginBottom: 10, color: '#1D3557' },
   tripItem: { fontSize: 16, paddingVertical: 5, color: '#333' },

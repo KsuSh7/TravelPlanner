@@ -8,7 +8,7 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [trips] = useContext(TripsContext);
 
-  const accessToken = 'pk.eyJ1IjoibGVyZmZmIiwiYSI6ImNtYWlncGpvaTA1N3Myb3I5cmlxazllbDUifQ.awWDk2DDm_ac6LV7hkKAqw'; // 🔁 заміни на свій справжній Mapbox токен
+  const accessToken = 'pk.eyJ1IjoibGVyZmZmIiwiYSI6ImNtYWlncGpvaTA1N3Myb3I5cmlxazllbDUifQ.awWDk2DDm_ac6LV7hkKAqw';
   const style = 'streets-v11';
   const zoom = 3;
 
@@ -47,7 +47,7 @@ export default function MapScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Міста майбутніх подорожей:</Text>
       {validCities.length === 0 ? (
-        <Text>Немає міст з координатами</Text>
+        <Text style={{color: '#1B4965'}}>Немає міст з координатами</Text>
       ) : (
         <>
           {validCities.map((trip, index) => (
@@ -61,8 +61,8 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', paddingTop: 40 },
-  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  container: { flex: 1,backgroundColor: '#CAF0F8', alignItems: 'center', paddingTop: 40 },
+  title: { fontSize: 20,color: '#1B4965', fontWeight: 'bold', marginBottom: 10 },
   map: { width: 300, height: 200, marginTop: 20, borderRadius: 10 },
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });
