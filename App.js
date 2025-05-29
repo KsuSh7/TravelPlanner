@@ -8,7 +8,8 @@ import MapScreen from './screen/MapScreen';
 import BottomTabs from './screen/BottomTabs';
 import ProfileScreen from './screen/ProfileScreen';
 import SpentScreen from './screen/SpentScreen';
-import { TripsProvider } from './screen/TripsContext'; // імпортуємо провайдер
+import { TripsProvider } from './screen/TripsContext';
+import { AuthProvider } from './screen/AuthContext';  // імпортуємо AuthProvider
 
 const Stack = createStackNavigator();
 
@@ -22,18 +23,20 @@ export default function App() {
   }
 
   return (
-    <TripsProvider>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Map" component={MapScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="Spent" component={SpentScreen} />
-          <Stack.Screen name="MainTabs" component={BottomTabs} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </TripsProvider>
+    <AuthProvider>        {/* Додаємо AuthProvider зверху */}
+      <TripsProvider>     {/* Потім TripsProvider */}
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Map" component={MapScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Spent" component={SpentScreen} />
+            <Stack.Screen name="MainTabs" component={BottomTabs} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </TripsProvider>
+    </AuthProvider>
   );
 }

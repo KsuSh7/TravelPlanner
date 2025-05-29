@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from './AuthContext'; // Імпортуємо контекст
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { saveToken } = useContext(AuthContext); // Отримуємо функцію з контексту
 
-  const saveToken = async (token) => {
+  const saveTokenToStorage = async (token) => {
     try {
       await AsyncStorage.setItem('authToken', token);
-      console.log('Token saved');
+      console.log('Token saved to AsyncStorage');
     } catch (e) {
-      console.error('Failed to save token:', e);
+      console.error('Failed to save token to AsyncStorage:', e);
     }
   };
 
@@ -22,15 +24,15 @@ export default function LoginScreen({ navigation }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-  
-      const text = await response.text();  // Замість json, спочатку подивимось текст
+
+      const text = await response.text();
       console.log('Response text:', text);
-  
-      // Спробуємо парсити JSON, якщо можливо
+
       try {
         const data = JSON.parse(text);
-        if (response.ok) {
-          await saveToken(data.token);
+        if (response.ok && data.token) {
+          saveToken(data.token);                // Зберігаємо у контексті
+          await saveTokenToStorage(data.token); // Зберігаємо у AsyncStorage
           navigation.navigate('MainTabs', { screen: 'FutureTrips' });
         } else {
           alert(data.message || 'Login failed');
@@ -44,7 +46,7 @@ export default function LoginScreen({ navigation }) {
       alert('Something went wrong');
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.titleTop}>Login to continue</Text>

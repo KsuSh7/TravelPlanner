@@ -5,29 +5,39 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { AuthContext } from './AuthContext';
 
 export default function FutureTrips() {
   const [trips, setTrips] = useContext(TripsContext);
+  const { token } = useContext(AuthContext);
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [tripName, setTripName] = useState('');
   const [tripDate, setTripDate] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCityId, setSelectedCityId] = useState(null); // id міста
   const [allCities, setAllCities] = useState([]);
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
-  // 🗺️ Завантаження міст з бекенду
   useEffect(() => {
-    fetch('http://192.168.1.162:5001/cities') // 🔁 Замінити на свій локальний IP
+
+    if (!token) {
+      return <Text>Loading...</Text>;
+    }
+
+
+    fetch('http://192.168.31.55:5001/cities', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => res.json())
       .then(data => setAllCities(data))
       .catch(err => console.error('Помилка при завантаженні міст:', err));
-  }, []);
+  }, [token]);
 
   const addTrip = () => {
-    if (tripName && tripDate && selectedCity) {
-      // Знаходимо координати обраного міста
-      const cityData = allCities.find(c => c.name === selectedCity);
+    if (tripName && tripDate && selectedCityId !== '') {
+      const cityData = allCities.find(c => c.id === selectedCityId);
       if (!cityData) {
         alert('Місто не знайдено');
         return;
@@ -36,7 +46,7 @@ export default function FutureTrips() {
       const newTrip = {
         name: tripName,
         date: tripDate,
-        city: selectedCity,
+        city: cityData.name,
         latitude: cityData.latitude,
         longitude: cityData.longitude
       };
@@ -45,7 +55,7 @@ export default function FutureTrips() {
       setModalVisible(false);
       setTripName('');
       setTripDate('');
-      setSelectedCity('');
+      setSelectedCityId(null);
     } else {
       alert('Будь ласка, заповніть всі поля');
     }
@@ -53,7 +63,7 @@ export default function FutureTrips() {
 
   const handleConfirmDate = (date) => {
     setTripDate(date.toLocaleDateString());
-    setDatePickerVisible(false);
+    setDatePickerVisible(true);
   };
 
   return (
@@ -90,17 +100,15 @@ export default function FutureTrips() {
             />
 
             <Picker
-              selectedValue={selectedCity}
-              onValueChange={(value) => setSelectedCity(value)}
+              selectedValue={selectedCityId ?? ''}
+              onValueChange={(value) => setSelectedCityId(value)}
               style={styles.picker}
               itemStyle={styles.pickerItem} >
               <Picker.Item label="Оберіть місто" value="" />
-                {allCities.map((city, index) => (
-              <Picker.Item
-                    key={index}
-                    label={city.name}
-                    value={city.name}/>
-                      ))}
+
+              {allCities.map((city) => (
+                <Picker.Item key={city.id} label={city.name} value={city.id} />
+              ))}
             </Picker>
 
 

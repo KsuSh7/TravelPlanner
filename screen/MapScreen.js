@@ -60,12 +60,9 @@ export default function MapScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1,backgroundColor: '#CAF0F8', alignItems: 'center', paddingTop: 40 },
-  title: { fontSize: 20,color: '#1B4965', fontWeight: 'bold', marginBottom: 10 },
-  map: { width: 300, height: 200, marginTop: 20, borderRadius: 10 },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+const styles = StyleSheet.create({ 
+  container: { flex: 1, paddingTop: 40, alignItems: 'center', backgroundColor: '#CAF0F8' },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#1B4965' },
+  map: { width: 350, height: 250, marginTop: 15, borderRadius: 10 },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' }
 });
-
-  
-  
