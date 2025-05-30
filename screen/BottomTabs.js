@@ -33,7 +33,7 @@ export default function BottomTabs() {
       })}
     >
       <Tab.Screen name="FutureTrips" component={FutureTrips} />
-      <Tab.Screen name="ProfileTrips" component={ProfileTripsScreen} />
+      <Tab.Screen name="Profile" component={ProfileTripsScreen} />
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Spent" component={SpentScreen} />
 

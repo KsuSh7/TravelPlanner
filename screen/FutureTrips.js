@@ -8,6 +8,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { AuthContext } from './AuthContext';
 
 export default function FutureTrips() {
+  const [userName, setUserName] = useState('');
   const [trips, setTrips] = useContext(TripsContext);
   const { token } = useContext(AuthContext);
 
@@ -19,21 +20,24 @@ export default function FutureTrips() {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
   useEffect(() => {
+  if (!token) return;
 
-    if (!token) {
-      return <Text>Loading...</Text>;
-    }
+  // Завантаження міст
+  fetch('http://192.168.1.162:5001/cities', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => res.json())
+    .then(data => setAllCities(data))
+    .catch(err => console.error('Помилка при завантаженні міст:', err));
 
-
-    fetch('http://192.168.31.55:5001/cities', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-      .then(res => res.json())
-      .then(data => setAllCities(data))
-      .catch(err => console.error('Помилка при завантаженні міст:', err));
-  }, [token]);
+  // Завантаження імені користувача
+  fetch('http://192.168.1.162:5001/api/users/me', {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => res.json())
+    .then(data => setUserName(data.name))  // Припускаємо, що відповідь має поле "name"
+    .catch(err => console.error('Помилка при завантаженні користувача:', err));
+}, [token]);
 
   const addTrip = () => {
     if (tripName && tripDate && selectedCityId !== '') {
@@ -69,6 +73,10 @@ export default function FutureTrips() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Майбутні подорожі</Text>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>Привіт, {userName}!</Text>
+    </View>
+
 
       <FlatList
         data={trips}
@@ -113,7 +121,10 @@ export default function FutureTrips() {
 
 
             <TouchableOpacity style={styles.dateButton} onPress={() => setDatePickerVisible(true)}>
-              <Text style={styles.dateButtonText}>{tripDate ? `Дата: ${tripDate}` : 'Вибрати дату'}</Text>
+              <Text style={styles.dateButtonText}>{tripDate ? `Дата: ${tripDate}` : 'Дату початку подорожі:'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.dateButton} onPress={() => setDatePickerVisible(true)}>
+              <Text style={styles.dateButtonText}>{tripDate ? `Дата: ${tripDate}` : 'Дату закінчення подорожі:'}</Text>
             </TouchableOpacity>
 
             <DateTimePickerModal
@@ -154,5 +165,15 @@ const styles = StyleSheet.create({
   saveButton: { backgroundColor: '#1B4965', padding: 15, width: '100%', borderRadius: 20, marginTop: 20 },
   saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   cancelButton: { marginTop: 10, padding: 10, backgroundColor: '#E0F7FF', borderRadius: 10 },
-  cancelButtonText: { color: '#1B4965', textAlign: 'center' }
+  cancelButtonText: { color: '#1B4965', textAlign: 'center' },header: {
+  marginTop: 20,
+  marginBottom: 10,
+  alignItems: 'center',
+},
+greeting: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#1B4965',
+},
+
 });
