@@ -1,12 +1,10 @@
-// BottomTabs.js
-
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import FutureTrips from './FutureTrips';
 import SpentScreen from './SpentScreen';
-import ProfileScreen from './ProfileScreen';
+import ProfileTripsScreen from './ProfileTripsScreen';
 import MapScreen from './MapScreen';  
 
 const Tab = createBottomTabNavigator();
@@ -28,7 +26,6 @@ export default function BottomTabs() {
           }else if (route.name=='Spent'){
             iconName='cash-outline';
           }
-
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#2f95dc',
@@ -36,7 +33,7 @@ export default function BottomTabs() {
       })}
     >
       <Tab.Screen name="FutureTrips" component={FutureTrips} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="ProfileTrips" component={ProfileTripsScreen} />
       <Tab.Screen name="Map" component={MapScreen} />
       <Tab.Screen name="Spent" component={SpentScreen} />
 

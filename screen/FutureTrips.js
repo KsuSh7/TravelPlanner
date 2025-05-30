@@ -25,7 +25,7 @@ export default function FutureTrips() {
     }
 
 
-    fetch('http://192.168.31.55:5001/cities', {
+    fetch('http://192.168.1.162:5001/cities', {
       headers: {
         Authorization: `Bearer ${token}`
       }
