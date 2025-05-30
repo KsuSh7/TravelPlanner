@@ -32,7 +32,7 @@ def login():
 
     user = User.query.filter_by(email=data.get('email')).first()
     if user and bcrypt.check_password_hash(user.password, data.get('password')):
-        token = create_access_token(identity=user.id)
+        token = create_access_token(identity=str(user.id))
         return jsonify({"token": token}), 200
 
     return jsonify({"message": "Невірний email або пароль."}), 401

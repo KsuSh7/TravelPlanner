@@ -5,7 +5,7 @@ from extensions import db
 from models import Trip, City  # BudgetCategory якщо треба, але тут не використовується
 
 trips_bp = Blueprint('trips', __name__, url_prefix='/api')
-cities_bp = Blueprint('cities', __name__)
+cities_bp = Blueprint('cities', __name__, url_prefix='/api')
 
 @trips_bp.route('/trips', methods=['GET'])
 @jwt_required()
@@ -38,18 +38,19 @@ def create_trip():
     data = request.get_json()
     user_id = get_jwt_identity()
 
-    # Валідація вхідних даних
-    required_fields = ['location', 'start_date', 'end_date', 'latitude', 'longitude']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f"'{field}' is required"}), 400
+    # Валідація
+    if 'location' not in data or 'start_date' not in data:
+        return jsonify({'error': 'location і start_date потрібні'}), 400
 
-    # Конвертація дат
     try:
         start_date = datetime.strptime(data['start_date'], '%Y-%m-%d')
-        end_date = datetime.strptime(data['end_date'], '%Y-%m-%d')
     except ValueError:
-        return jsonify({'error': 'Неправильний формат дати. Використовуйте YYYY-MM-DD'}), 400
+        return jsonify({'error': 'Неправильний формат start_date'}), 400
+
+    end_date = start_date  # якщо кінцева дата не задана — поставимо її такою ж
+
+    latitude = data.get('latitude', 0.0)
+    longitude = data.get('longitude', 0.0)
 
     trip = Trip(
         user_id=user_id,
@@ -57,12 +58,22 @@ def create_trip():
         start_date=start_date,
         end_date=end_date,
         notes=data.get('notes'),
-        latitude=data['latitude'],
-        longitude=data['longitude']
+        latitude=latitude,
+        longitude=longitude
     )
     db.session.add(trip)
     db.session.commit()
-    return jsonify({"message": "Подорож створена."}), 201
+
+    # Повернути створений об’єкт
+    return jsonify({
+        'id': trip.id,
+        'location': trip.location,
+        'start_date': trip.start_date.isoformat(),
+        'end_date': trip.end_date.isoformat(),
+        'notes': trip.notes,
+        'latitude': trip.latitude,
+        'longitude': trip.longitude,
+    }), 201
 
 @trips_bp.route('/trips/<int:trip_id>', methods=['PUT'])
 @jwt_required()

@@ -1,179 +1,160 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
-    View, Text, TextInput, TouchableOpacity, StyleSheet,  FlatList, Modal
+  View, Text, FlatList, Modal, TextInput, TouchableOpacity, StyleSheet, Button
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import db from '../instance/database'; // 👈 Підключення до SQLite
+import { AuthContext } from './AuthContext';
 
-export default function ProfileTripsScreen({ navigation }) {
-    const [userName, setUserName] = useState('');
-    const [userId] = useState(1); 
+const ProfileTripsScreen = () => {
+    const { token } = useContext(AuthContext);
 
     const [trips, setTrips] = useState([]);
-    const [allCities, setAllCities] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
     const [selectedCity, setSelectedCity] = useState('');
-    const [tripName, setTripName] = useState('');
-    const [tripDate, setTripDate] = useState('');
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [isDatePickerVisible, setDatePickerVisible] = useState(false);
+    const [selectedDate, setSelectedDate] = useState('');
 
-    useEffect(() => {
-    loadUser();
-    loadCities();
-    loadTrips();
-    }, []);
+    const loadTripsFromBackend = async () => {
+        try {
+            const response = await fetch('http://192.168.31.55:5001/api/trips', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+            });
 
-    const loadUser = () => {
-    db.transaction(tx => {
-        tx.executeSql(
-        'SELECT name FROM users WHERE id = ?;',
-        [userId],
-        (_, { rows }) => {
-            if (rows.length > 0) setUserName(rows._array[0].name);
+            if (response.ok) {
+            const data = await response.json();
+            setTrips(data);
+            } else {
+            console.error('Не вдалося завантажити подорожі');
+            }
+        } catch (error) {
+            console.error('Помилка при завантаженні подорожей:', error);
         }
-        );
-    });
-    };
+        };
 
-    const loadCities = () => {
-    fetch('http://192.168.1.162:5001/cities')
-        .then(res => res.json())
-        .then(data => setAllCities(data))
-        .catch(err => console.error('Помилка при завантаженні міст:', err));
-    };
+        const loadCitiesFromBackend = async () => {
+        try {
+            const response = await fetch('http://192.168.31.55:5001/api/cities', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+            });
 
-    const loadTrips = () => {
-    db.transaction(tx => {
-        tx.executeSql(
-        'SELECT name, date, city FROM trips WHERE user_id = ? ORDER BY date DESC;',
-        [userId],
-        (_, { rows }) => setTrips(rows._array)
-        );
-    });
-    };
-
-    const addTrip = () => {
-    if (!tripName || !tripDate || !selectedCity) {
-        alert('Будь ласка, заповніть всі поля');
-        return;
-    }
-
-    const cityData = allCities.find(c => c.name === selectedCity);
-    if (!cityData) return alert('Місто не знайдено');
-
-    db.transaction(tx => {
-        tx.executeSql(
-        'INSERT INTO trips (user_id, name, date, city, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?);',
-        [userId, tripName, tripDate, selectedCity, cityData.latitude, cityData.longitude],
-        () => {
-            loadTrips();
-            setTripName('');
-            setTripDate('');
-            setSelectedCity('');
-            setModalVisible(false);
-        },
-        (_, error) => {
-            console.log('Помилка при додаванні подорожі:', error);
+            if (response.ok) {
+            const data = await response.json();
+            setCities(data.map(c => c.name));
+            } else {
+            console.error('Не вдалося завантажити міста');
+            }
+        } catch (error) {
+            console.error('Помилка при завантаженні міст:', error);
         }
-        );
-    });
+        };
+
+        useEffect(() => {
+        loadTripsFromBackend();
+        loadCitiesFromBackend();
+        }, 
+    []);
+
+    const addTrip = async () => {
+        console.log('Запит на додавання подорожі починається');
+        if (!selectedCity || !startDate || !endDate) {
+            alert('Вкажіть місто та дати');
+            return;
+        }
+
+        const body = {
+            location: selectedCity.name,
+            start_date: startDate.toISOString().slice(0, 10), // або якщо це строка, переконайся, що формат правильний
+            end_date: endDate.toISOString().slice(0, 10),
+            latitude: selectedCity.latitude,
+            longitude: selectedCity.longitude,
+        };
+
+        try {
+            const response = await fetch('http://192.168.31.55:5001/api/trips', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+            });
+            console.log('Отримали відповідь:', response.status);
+
+            if (response.ok) {
+            const newTrip = await response.json();
+            // Оновити стейт подорожей
+            } else {
+            const err = await response.json();
+            console.log('Помилка додавання подорожі:', err);
+            }
+        } catch (error) {
+            console.log('Помилка при fetch:', error);
+        }
     };
 
-    const handleConfirmDate = (date) => {
-    setTripDate(date.toISOString().split('T')[0]);
-    setDatePickerVisible(false);
-    };
-
-    return (
+  return (
     <View style={styles.container}>
-        <Text style={styles.header}>👤 Профіль: {userName}</Text>
+      <FlatList
+        data={trips}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.tripItem}>
+            <Text style={styles.city}>{item.city}</Text>
+            <Text style={styles.date}>{item.date}</Text>
+          </View>
+        )}
+        ListEmptyComponent={<Text style={styles.empty}>Подорожей ще немає</Text>}
+      />
+      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>Додати подорож</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-            <Text style={styles.addButtonText}>+ Додати подорож</Text>
-        </TouchableOpacity>
-
-        <FlatList
-            data={trips}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => navigation.navigate('TripDetails', { trip: item })}>
-                <Text style={styles.tripItem}>
-        • {item.name} — {item.date} до {item.end_date} — {item.city} — ₴{item.budget}
-        </Text>
-        </TouchableOpacity>
-)}
-
-        ListEmptyComponent={<Text style={styles.empty}>Поки немає подорожей</Text>}
-        />
-
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.logoutText}>Вийти</Text>
-        </TouchableOpacity>
-
-      {/* Модалка */}
-        <Modal visible={isModalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-                <TextInput
-                style={styles.input}
-                placeholder="Назва подорожі"
-                value={tripName}
-                onChangeText={setTripName}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>Місто:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Введіть місто"
+              value={selectedCity}
+              onChangeText={setSelectedCity}
+              autoCorrect={false}
+              autoCapitalize="none"
             />
-
-            <Picker
-                selectedValue={selectedCity}
-                onValueChange={(value) => setSelectedCity(value)}
-                style={styles.picker}
-                itemStyle={{ color: '#1B4965' }}
-            >
-                <Picker.Item label="Оберіть місто" value="" />
-                {allCities.map((city, i) => (
-                <Picker.Item key={i} label={city.name} value={city.name} />
-                ))}
-            </Picker>
-
-            <TouchableOpacity style={styles.dateButton} onPress={() => setDatePickerVisible(true)}>
-                <Text style={styles.dateButtonText}>{tripDate || 'Вибрати дату'}</Text>
-            </TouchableOpacity>
-
-            <DateTimePickerModal
-                isVisible={isDatePickerVisible}
-                mode="date"
-                onConfirm={handleConfirmDate}
-                onCancel={() => setDatePickerVisible(false)}
+            {cities.length > 0 && !cities.includes(selectedCity) && selectedCity !== '' && (
+              <Text style={{ color: 'red', marginBottom: 5 }}>Місто не знайдено в базі</Text>
+            )}
+            <Text>Дата:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="YYYY-MM-DD"
+              value={selectedDate}
+              onChangeText={setSelectedDate}
             />
-
-            <TouchableOpacity style={styles.saveButton} onPress={addTrip}>
-                <Text style={styles.saveText}>Зберегти</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Скасувати</Text>
-            </TouchableOpacity>
-            </View>
+            <Button title="Додати" onPress={addTrip} />
+            <Button title="Скасувати" onPress={() => setModalVisible(false)} />
+          </View>
         </View>
-        </Modal>
+      </Modal>
     </View>
-    );
-}
+  );
+};
+
+export default ProfileTripsScreen;
+
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#CAF0F8', padding: 20 },
-    header: { fontSize: 24, fontWeight: 'bold', color: '#1B4965', marginBottom: 10 },
-    tripItem: { fontSize: 16, paddingVertical: 5, color: '#1B4965' },
-    empty: { fontStyle: 'italic', color: '#999', textAlign: 'center', marginTop: 20 },
-    addButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10, marginBottom: 10 },
-    addButtonText: { color: '#fff', textAlign: 'center' },
-    logoutButton: { marginTop: 20, alignSelf: 'center' },
-    logoutText: { color: 'red', fontWeight: 'bold' },
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center' },
-    modalContent: { backgroundColor: '#fff', margin: 20, padding: 20, borderRadius: 10 },
-    input: { backgroundColor: '#E0F7FF', padding: 10, borderRadius: 10, marginBottom: 10 },
-    picker: { backgroundColor: '#E0F7FF', marginBottom: 10, borderRadius: 10 },
-    dateButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10 },
-    dateButtonText: { color: '#fff', textAlign: 'center' },
-    saveButton: { backgroundColor: '#1B4965', marginTop: 10, padding: 12, borderRadius: 10 },
-    saveText: { color: '#fff', textAlign: 'center' },
-    cancelText: { color: '#1B4965', textAlign: 'center', marginTop: 10 },
+  container: { flex: 1, backgroundColor: '#CAF0F8', padding: 20 },
+  header: { fontSize: 24, fontWeight: 'bold', color: '#1B4965', marginBottom: 10 },
+  tripItem: { fontSize: 16, paddingVertical: 5, color: '#1B4965' },
+  empty: { fontStyle: 'italic', color: '#999', textAlign: 'center', marginTop: 20 },
+  addButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10, marginBottom: 10 },
+  addButtonText: { color: '#fff', textAlign: 'center' },
+  logoutButton: { marginTop: 20, alignSelf: 'center' },
+  logoutText: { color: 'red', fontWeight: 'bold' },
+  modalContainer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center' },
+  modalContent: { backgroundColor: '#fff', margin: 20, padding: 20, borderRadius: 10 },
+  input: { backgroundColor: '#E0F7FF', padding: 10, borderRadius: 10, marginBottom: 10 },
 });
