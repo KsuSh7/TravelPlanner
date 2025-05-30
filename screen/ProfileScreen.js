@@ -22,7 +22,7 @@ const ProfileTripsScreen = () => {
 
   const loadTripsFromBackend = async () => {
     try {
-      const response = await fetch('http://192.168.1.162:5001/api/trips', {
+      const response = await fetch('http://192.168.31.55:5001/api/trips', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -39,7 +39,7 @@ const ProfileTripsScreen = () => {
 
   const loadCitiesFromBackend = async () => {
     try {
-      const response = await fetch('http://192.168.1.162:5001/api/cities', {
+      const response = await fetch('http://192.168.31.55:5001/api/cities', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -75,7 +75,7 @@ const ProfileTripsScreen = () => {
     };
 
     try {
-      const response = await fetch('http://192.168.1.162:5001/api/trips', {
+      const response = await fetch('http://192.168.31.55:5001/api/trips', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

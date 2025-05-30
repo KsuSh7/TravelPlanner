@@ -23,7 +23,7 @@ export default function FutureTrips() {
   if (!token) return;
 
   // Завантаження міст
-  fetch('http://192.168.1.162:5001/cities', {
+  fetch('http://192.168.31.55:5001/api/cities', {
     headers: { Authorization: `Bearer ${token}` }
   })
     .then(res => res.json())
@@ -31,7 +31,7 @@ export default function FutureTrips() {
     .catch(err => console.error('Помилка при завантаженні міст:', err));
 
   // Завантаження імені користувача
-  fetch('http://192.168.1.162:5001/api/users/me', {
+  fetch('http://192.168.31.55:5001/api/users/me', {
     headers: { Authorization: `Bearer ${token}` }
   })
     .then(res => res.json())
@@ -108,16 +108,17 @@ export default function FutureTrips() {
             />
 
             <Picker
-              selectedValue={selectedCityId ?? ''}
-              onValueChange={(value) => setSelectedCityId(value)}
+              selectedValue={selectedCityId ?? 0}
+              onValueChange={(value) => setSelectedCityId(Number(value))}
               style={styles.picker}
-              itemStyle={styles.pickerItem} >
-              <Picker.Item label="Оберіть місто" value="" />
-
+              itemStyle={styles.pickerItem}
+            >
+              <Picker.Item label="Оберіть місто" value={0} />
               {allCities.map((city) => (
                 <Picker.Item key={city.id} label={city.name} value={city.id} />
               ))}
             </Picker>
+
 
 
             <TouchableOpacity style={styles.dateButton} onPress={() => setDatePickerVisible(true)}>
