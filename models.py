@@ -1,8 +1,6 @@
 from extensions import db, bcrypt
 from datetime import date
 from sqlalchemy.orm import validates
-import enum
-from sqlalchemy import Enum
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -28,10 +26,10 @@ class Trip(db.Model):
     city_id = db.Column(db.Integer, db.ForeignKey('cities.id'), nullable=False)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    notes = db.Column(db.Text)
     status = db.Column(db.String(20), default='заплановано')
 
-    budgets = db.relationship('BudgetCategory', backref='trip', lazy=True, cascade="all, delete-orphan")
+    total_budget = db.Column(db.Float, default=0.0)  # додана колонка бюджету
+
     city = db.relationship('City', backref='trips')
 
     @validates('end_date')
@@ -39,20 +37,6 @@ class Trip(db.Model):
         if self.start_date and end_date < self.start_date:
             raise ValueError("End date must be after start date")
         return end_date
-
-class BudgetCategoryEnum(enum.Enum):
-    hotel = "готель"
-    transport = "дорога"
-    food = "їжа"
-    other = "інше"
-
-class BudgetCategory(db.Model):
-    __tablename__ = 'budget_categories'
-
-    id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
-    category = db.Column(Enum(BudgetCategoryEnum), nullable=False)
-    amount = db.Column(db.Float)
 
 class City(db.Model):
     __tablename__ = 'cities'

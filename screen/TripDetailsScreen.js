@@ -15,17 +15,32 @@ export default function TripDetailsScreen({ route }) {
   }, []);
 
   const loadExpenses = () => {
+    if (!db) {
+      console.warn('База даних недоступна');
+      return;
+    }
+
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM expenses WHERE trip_id = ?;',
         [trip.id],
         (_, { rows }) => setExpenses(rows._array),
-        (_, error) => console.error('Помилка при завантаженні витрат:', error)
+        (_, error) => {
+          console.error('Помилка при завантаженні витрат:', error);
+          return true;
+        }
       );
     });
   };
 
+
+
   const addExpense = () => {
+    if (!db) {
+      Alert.alert('Помилка', 'База даних недоступна на цій платформі');
+      return;
+    }
+
     const parsedAmount = parseFloat(amount);
     if (!title || isNaN(parsedAmount)) {
       Alert.alert('Помилка', 'Заповніть коректно назву та суму витрати');
@@ -41,10 +56,14 @@ export default function TripDetailsScreen({ route }) {
           setAmount('');
           loadExpenses();
         },
-        (_, error) => console.error('Помилка при додаванні витрати:', error)
+        (_, error) => {
+          console.error('Помилка при додаванні витрати:', error);
+          return true;
+        }
       );
     });
   };
+
 
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const remaining = (trip.budget || 0) - totalSpent;
