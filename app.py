@@ -29,11 +29,13 @@ with app.app_context():
     from routes.trips import trips_bp
     from routes.trips import cities_bp
     from routes.users import users_bp
+    from routes.expenses import expenses_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(trips_bp)
     app.register_blueprint(cities_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(expenses_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

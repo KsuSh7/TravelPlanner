@@ -63,6 +63,7 @@ export default function FutureTrips() {
       start_date: tripDate,
       end_date: tripEndDate,
       total_budget: parseFloat(budget),
+      trip_name: tripName
     };
 
     fetch('http://192.168.31.55:5001/api/trips', {
@@ -114,7 +115,7 @@ export default function FutureTrips() {
           <TouchableOpacity onPress={() => navigation.navigate('TripDetails', { trip: item })}>
             <View style={styles.tripItem}>
               <Text style={styles.tripText}>
-                {item.location} — {item.start_date} - {item.end_date}
+                {item.city_name} — {item.start_date} - {item.end_date}
               </Text>
             </View>
           </TouchableOpacity>

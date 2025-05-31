@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert
 } from 'react-native';
-import db from '../instance/database';
+import { AuthContext } from './AuthContext';
 
 export default function TripDetailsScreen({ route }) {
   const { trip } = route.params;
+  const { token } = useContext(AuthContext);
+
   const [expenses, setExpenses] = useState([]);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -14,59 +16,61 @@ export default function TripDetailsScreen({ route }) {
     loadExpenses();
   }, []);
 
-  const loadExpenses = () => {
-    if (!db) {
-      console.warn('База даних недоступна');
-      return;
+  const loadExpenses = async () => {
+    try {
+      const response = await fetch(`http://192.168.31.55:5001/api/trips/${trip.id}/expenses`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (!response.ok) {
+        throw new Error(`Помилка сервера: ${response.status}`);
+      }
+      const data = await response.json();
+      setExpenses(data);
+    } catch (error) {
+      console.error('Помилка при завантаженні витрат:', error);
+      Alert.alert('Помилка', 'Не вдалося завантажити витрати. Перевірте підключення до мережі.');
     }
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM expenses WHERE trip_id = ?;',
-        [trip.id],
-        (_, { rows }) => setExpenses(rows._array),
-        (_, error) => {
-          console.error('Помилка при завантаженні витрат:', error);
-          return true;
-        }
-      );
-    });
   };
 
-
-
-  const addExpense = () => {
-    if (!db) {
-      Alert.alert('Помилка', 'База даних недоступна на цій платформі');
-      return;
-    }
-
+  const addExpense = async () => {
     const parsedAmount = parseFloat(amount);
     if (!title || isNaN(parsedAmount)) {
       Alert.alert('Помилка', 'Заповніть коректно назву та суму витрати');
       return;
     }
 
-    db.transaction(tx => {
-      tx.executeSql(
-        'INSERT INTO expenses (trip_id, title, amount) VALUES (?, ?, ?);',
-        [trip.id, title, parsedAmount],
-        () => {
-          setTitle('');
-          setAmount('');
-          loadExpenses();
+    try {
+      const response = await fetch(`http://192.168.31.55:5001/api/trips/${trip.id}/expenses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        (_, error) => {
-          console.error('Помилка при додаванні витрати:', error);
-          return true;
-        }
-      );
-    });
+        body: JSON.stringify({
+          title,
+          amount: parsedAmount
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        console.error('Помилка при додаванні витрати:', err);
+        Alert.alert('Помилка', err.message || 'Не вдалося додати витрату');
+        return;
+      }
+
+      setTitle('');
+      setAmount('');
+      loadExpenses();
+
+    } catch (error) {
+      console.error('Помилка при додаванні витрати:', error);
+      Alert.alert('Помилка', 'Не вдалося додати витрату. Перевірте підключення до мережі.');
+    }
   };
 
-
-  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const remaining = (trip.budget || 0) - totalSpent;
+  const totalSpent = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+  const remaining = (trip.total_budget ?? trip.budget ?? 0) - totalSpent;
 
   const daysLeft = (() => {
     const today = new Date();
@@ -83,9 +87,9 @@ export default function TripDetailsScreen({ route }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>✈️ {trip.name}</Text>
-      <Text>📍 {trip.city}</Text>
+      <Text>📍 {trip.city?.name || trip.city}</Text>
       <Text>🗓 {trip.start_date} – {trip.end_date}</Text>
-      <Text>💰 Бюджет: ₴{trip.budget || 0}</Text>
+      <Text>💰 Бюджет: ₴{remaining + totalSpent}</Text>
       <Text>💸 Витрачено: ₴{totalSpent}</Text>
       <Text>💼 Залишилось: ₴{remaining}</Text>
       <Text style={styles.leftDay}>{daysLeft}</Text>

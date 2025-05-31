@@ -24,13 +24,14 @@ class Trip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     city_id = db.Column(db.Integer, db.ForeignKey('cities.id'), nullable=False)
+    trip_name = db.Column(db.String(100))
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(20), default='заплановано')
-
-    total_budget = db.Column(db.Float, default=0.0)  # додана колонка бюджету
+    total_budget = db.Column(db.Float, default=0.0)
 
     city = db.relationship('City', backref='trips')
+    expenses = db.relationship('Expense', backref='trip', cascade="all, delete-orphan", lazy=True)
 
     @validates('end_date')
     def validate_end_date(self, key, end_date):
@@ -45,3 +46,12 @@ class City(db.Model):
     name = db.Column(db.String(50))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+
+class Expense(db.Model):
+    __tablename__ = 'expenses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    date_added = db.Column(db.Date, default=date.today)

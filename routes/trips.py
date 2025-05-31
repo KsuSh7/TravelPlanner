@@ -27,6 +27,7 @@ def trip_to_dict(trip):
         'id': trip.id,
         'city_id': trip.city_id,
         'city_name': trip.city.name if trip.city else None,
+        'trip_name': trip.trip_name,
         'start_date': trip.start_date.isoformat(),
         'end_date': trip.end_date.isoformat(),
         'latitude': trip.city.latitude if trip.city else None,
