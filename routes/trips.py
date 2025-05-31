@@ -13,7 +13,6 @@ def get_trips():
     user_id = get_jwt_identity()
     today = date.today()
 
-    # Видаляємо завершені поїздки
     Trip.query.filter(Trip.user_id == user_id, Trip.end_date < today).delete()
     db.session.commit()
 
@@ -62,6 +61,7 @@ def create_trip():
             user_id=user_id,
             city_id=data['city_id'],
             start_date=start_date,
+            trip_name=data['trip_name'],
             end_date=end_date,
             total_budget=float(data['total_budget']),
             status='заплановано'

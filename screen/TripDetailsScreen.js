@@ -86,8 +86,8 @@ export default function TripDetailsScreen({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>✈️ {trip.name}</Text>
-      <Text>📍 {trip.city?.name || trip.city}</Text>
+      <Text style={styles.title}>✈️ {trip.trip_name}</Text>
+      <Text>📍 {trip.city_name}</Text>
       <Text>🗓 {trip.start_date} – {trip.end_date}</Text>
       <Text>💰 Бюджет: ₴{remaining + totalSpent}</Text>
       <Text>💸 Витрачено: ₴{totalSpent}</Text>
