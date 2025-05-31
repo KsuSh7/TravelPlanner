@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View, Text, TextInput, Button, FlatList, TouchableOpacity,
   Dimensions, StyleSheet
@@ -13,47 +13,18 @@ export default function SpentScreen() {
   const [expenseAmount, setExpenseAmount] = useState('');
   const [expenses, setExpenses] = useState([]);
 
-  const tripId = 1; // тимчасово
-
-  const fetchExpenses = async () => {
-    try {
-      const response = await fetch(`http://192.168.31.55:5001/api/expenses/${tripId}`);
-      const data = await response.json();
-      const formatted = data.map((item) => ({
-        id: item.id.toString(),
-        name: item.category,
-        amount: item.amount,
-      }));
-      setExpenses(formatted);
-    } catch (error) {
-      console.error('Помилка при отриманні витрат:', error);
-    }
-  };
-
-  const addExpense = async () => {
+  const addExpense = () => {
     if (!expenseName || !expenseAmount) return;
 
     const newExpense = {
-      category: expenseName,
+      id: Date.now().toString(),  // унікальний id
+      name: expenseName,
       amount: parseFloat(expenseAmount),
-      trip_id: tripId,
     };
 
-    try {
-      const response = await fetch('http://192.168.31.55:5001/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newExpense),
-      });
-
-      if (response.ok) {
-        fetchExpenses(); // оновлення
-        setExpenseName('');
-        setExpenseAmount('');
-      }
-    } catch (error) {
-      console.error('Помилка при додаванні витрати:', error);
-    }
+    setExpenses([...expenses, newExpense]);
+    setExpenseName('');
+    setExpenseAmount('');
   };
 
   const deleteExpense = (id) => {
@@ -75,11 +46,6 @@ export default function SpentScreen() {
     ],
   };
 
-  // Оновлення при завантаженні екрану
-  useEffect(() => {
-    fetchExpenses();
-  }, []);
-
   return (
     <View style={styles.container}>
       {!budgetSet ? (
@@ -91,13 +57,14 @@ export default function SpentScreen() {
             value={budget}
             onChangeText={setBudget}
             placeholder="Ваш бюджет ₴"
+            placeholderTextColor="#7B9EBF"
           />
           <Button title="Зберегти бюджет" onPress={() => setBudgetSet(true)} />
         </>
       ) : (
         <>
           <Text style={styles.title}>Ваш бюджет: ₴{budget}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: getRemaining() >= 0 ? 'green' : 'red' }]}>
             Залишилось: ₴{getRemaining().toFixed(2)}
           </Text>
 
@@ -107,6 +74,7 @@ export default function SpentScreen() {
             value={expenseName}
             onChangeText={setExpenseName}
             placeholder="Назва витрати"
+            placeholderTextColor="#7B9EBF"
           />
           <TextInput
             style={styles.input}
@@ -114,6 +82,7 @@ export default function SpentScreen() {
             value={expenseAmount}
             onChangeText={setExpenseAmount}
             placeholder="Сума витрати"
+            placeholderTextColor="#7B9EBF"
           />
           <Button title="Додати" onPress={addExpense} />
 
@@ -169,9 +138,9 @@ const styles = StyleSheet.create({
     color: '#1B4965',
     marginBottom: 20,
   },
-  subtitle: { fontSize: 18, color: 'green', marginBottom: 10 },
+  subtitle: { fontSize: 18, marginBottom: 10 },
   sectionTitle: { marginTop: 20, fontSize: 18, fontWeight: '600', color: '#1B4965' },
-  input: { borderWidth: 1, padding: 8, marginVertical: 5, borderRadius: 5, width: '90%' },
+  input: { borderWidth: 1, padding: 8, marginVertical: 5, borderRadius: 5, width: '90%', color: '#000' },
   expenseItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',

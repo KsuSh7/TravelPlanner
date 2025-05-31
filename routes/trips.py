@@ -31,7 +31,6 @@ def trip_to_dict(trip):
         'end_date': trip.end_date.isoformat(),
         'latitude': trip.city.latitude if trip.city else None,
         'longitude': trip.city.longitude if trip.city else None,
-        'status': trip.status,
         'total_budget': trip.total_budget
     }
 
@@ -64,7 +63,6 @@ def create_trip():
             trip_name=data['trip_name'],
             end_date=end_date,
             total_budget=float(data['total_budget']),
-            status='заплановано'
         )
 
         db.session.add(trip)

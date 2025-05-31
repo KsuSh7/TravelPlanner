@@ -27,7 +27,6 @@ class Trip(db.Model):
     trip_name = db.Column(db.String(100))
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
-    status = db.Column(db.String(20), default='заплановано')
     total_budget = db.Column(db.Float, default=0.0)
 
     city = db.relationship('City', backref='trips')

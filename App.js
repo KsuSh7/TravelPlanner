@@ -9,10 +9,13 @@ import BottomTabs from './screen/BottomTabs';
 import ProfileScreen from './screen/ProfileScreen';
 import SpentScreen from './screen/SpentScreen';
 import { TripsProvider } from './screen/TripsContext';
-import { AuthProvider } from './screen/AuthContext';  // імпортуємо AuthProvider
+import { AuthProvider } from './screen/AuthContext';
 import TripDetailsScreen from './screen/TripDetailsScreen';
+import { LogBox } from 'react-native';
 
-
+LogBox.ignoreLogs([
+  'Text strings must be rendered within a <Text> component',
+]);
 
 const Stack = createStackNavigator();
 
@@ -26,8 +29,8 @@ export default function App() {
   }
 
   return (
-    <AuthProvider>        {/* Додаємо AuthProvider зверху */}
-      <TripsProvider>     {/* Потім TripsProvider */}
+    <AuthProvider>
+      <TripsProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Welcome" component={WelcomeScreen} />

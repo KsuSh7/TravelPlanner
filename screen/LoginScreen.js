@@ -1,12 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthContext } from './AuthContext'; // Імпортуємо контекст
+import { AuthContext } from './AuthContext';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { saveToken } = useContext(AuthContext); // Отримуємо функцію з контексту
+  const { saveToken } = useContext(AuthContext);
 
   const saveTokenToStorage = async (token) => {
     try {
@@ -31,8 +31,8 @@ export default function LoginScreen({ navigation }) {
       try {
         const data = JSON.parse(text);
         if (response.ok && data.token) {
-          saveToken(data.token);                // Зберігаємо у контексті
-          await saveTokenToStorage(data.token); // Зберігаємо у AsyncStorage
+          saveToken(data.token);
+          await saveTokenToStorage(data.token);
           navigation.navigate('MainTabs', { screen: 'FutureTrips' });
         } else {
           alert(data.message || 'Login failed');

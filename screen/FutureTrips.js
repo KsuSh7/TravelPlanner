@@ -41,7 +41,7 @@ export default function FutureTrips() {
       }
     })
       .then(res => res.json())
-      .then(data => setUserName(data.name))
+      .then(data => setUserName(data.username))
       .catch(err => console.error('Помилка при завантаженні користувача:', err));
 
     fetch('http://192.168.31.55:5001/api/trips', {
@@ -132,12 +132,14 @@ export default function FutureTrips() {
             <TextInput
               style={styles.input}
               placeholder="Назва подорожі"
+              placeholderTextColor="#7B9EBF"
               value={tripName}
               onChangeText={setTripName}
             />
             <TextInput
               style={styles.input}
               placeholder="Бюджет (грн)"
+              placeholderTextColor="#7B9EBF"
               value={budget}
               onChangeText={setBudget}
               keyboardType="numeric"
@@ -149,9 +151,13 @@ export default function FutureTrips() {
               itemStyle={styles.pickerItem}
             >
               <Picker.Item label="Оберіть місто" value={null} />
-              {allCities.map(city => (
-                <Picker.Item key={city.id} label={city.name} value={city.id} />
-              ))}
+              {allCities
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(city => (
+                  <Picker.Item key={city.id} label={city.name} value={city.id} />
+                ))
+              }
             </Picker>
 
             <TouchableOpacity
@@ -183,6 +189,7 @@ export default function FutureTrips() {
               mode="date"
               onConfirm={handleConfirmDate}
               onCancel={() => setDatePickerVisible(false)}
+              textColor="#1B4965"
             />
 
             <TouchableOpacity style={styles.saveButton} onPress={addTrip}>
@@ -209,7 +216,7 @@ const styles = StyleSheet.create({
   tripText: { fontSize: 18, color: '#1B4965' },
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
   modalContent: { width: '85%', backgroundColor: '#fff', padding: 20, borderRadius: 10 },
-  input: { width: '100%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10 },
+  input: { width: '100%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10, },
   picker: { width: '100%', backgroundColor: '#E0F7FF', borderRadius: 10, marginVertical: 10, color: '#1B4965' },
   pickerItem: { color: '#1B4965' },
   dateButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10, marginVertical: 10 },

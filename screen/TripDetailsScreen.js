@@ -13,13 +13,17 @@ export default function TripDetailsScreen({ route }) {
   const [amount, setAmount] = useState('');
 
   useEffect(() => {
-    loadExpenses();
-  }, []);
+    if (token) {
+      loadExpenses();
+    }
+  }, [token]);
 
   const loadExpenses = async () => {
+    if (!token) return;
+
     try {
       const response = await fetch(`http://192.168.31.55:5001/api/trips/${trip.id}/expenses`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!response.ok) {
         throw new Error(`Помилка сервера: ${response.status}`);

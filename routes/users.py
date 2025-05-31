@@ -19,5 +19,4 @@ def get_current_user():
         "id": user.id,
         "username": user.username,
         "email": user.email
-        # Додай інші поля, якщо потрібно
     })
