@@ -11,8 +11,7 @@ import { AuthContext } from './AuthContext';
 export default function FutureTrips() {
   const [userName, setUserName] = useState('');
   const [trips, setTrips] = useContext(TripsContext);
-  const { token } = useContext(AuthContext);
-  const { setToken } = useContext(AuthContext); 
+  const { token, logout } = useContext(AuthContext);
 
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,14 +29,14 @@ export default function FutureTrips() {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://192.168.1.162:5001/api/cities', {
+    fetch('http://192.168.31.55:5001/api/cities', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(setAllCities)
       .catch(err => console.error('Помилка при завантаженні міст:', err));
 
-    fetch('http://192.168.1.162:5001/api/users/me', {
+    fetch('http://192.168.31.55:5001/api/users/me', {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -47,7 +46,7 @@ export default function FutureTrips() {
       .then(data => setUserName(data.username))
       .catch(err => console.error('Помилка при завантаженні користувача:', err));
 
-    fetch('http://192.168.1.162:5001/api/trips', {
+    fetch('http://192.168.31.55:5001/api/trips', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -69,7 +68,7 @@ export default function FutureTrips() {
       trip_name: tripName
     };
 
-    fetch('http://192.168.1.162:5001/api/trips', {
+    fetch('http://192.168.31.55:5001/api/trips', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -216,7 +215,13 @@ export default function FutureTrips() {
         </View>
       </View>
     </Modal>
-      <TouchableOpacity style={styles.logoutButton} onPress={() => setToken(null)}>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={() => {
+          logout();
+          navigation.navigate('Welcome');
+        }}
+      >
         <Text style={styles.logoutText}>🚪 Вийти з профілю</Text>
       </TouchableOpacity>
 
