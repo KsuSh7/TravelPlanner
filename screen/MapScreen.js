@@ -1,36 +1,60 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, StyleSheet, Image, ActivityIndicator, Text } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { TripsContext } from './TripsContext';
 
 export default function MapScreen() {
-  const [staticMapUrl, setStaticMapUrl] = useState(null);
-  const [validCities, setValidCities] = useState([]);
+  const [htmlContent, setHtmlContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [trips] = useContext(TripsContext);
 
   const accessToken = 'pk.eyJ1IjoibGVyZmZmIiwiYSI6ImNtYWlncGpvaTA1N3Myb3I5cmlxazllbDUifQ.awWDk2DDm_ac6LV7hkKAqw';
-  const style = 'streets-v11';
-  const zoom = 3;
 
   useEffect(() => {
-    const filtered = trips.filter(t => t.latitude && t.longitude);
-    setValidCities(filtered);
+    const validTrips = trips.filter(
+      (t) => typeof t.latitude === 'number' && typeof t.longitude === 'number'
+    );
 
-    if (filtered.length === 0) {
-      setStaticMapUrl(null);
+    if (validTrips.length === 0) {
+      setHtmlContent(null);
       setLoading(false);
       return;
     }
 
-    const markers = filtered
-      .map(t => `pin-l+ff0000(${t.longitude},${t.latitude})`)
-      .join(',');
+    const markersJS = validTrips.map(
+      (trip) => `L.marker([${trip.latitude}, ${trip.longitude}]).addTo(map).bindPopup('${trip.city_name}')`
+    ).join('\n');
 
-    const center = `${filtered[0].longitude},${filtered[0].latitude}`;
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+        <style>
+          #map { height: 100vh; width: 100vw; }
+          body, html { margin: 0; padding: 0; height: 100%; }
+        </style>
+      </head>
+      <body>
+        <div id="map"></div>
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+        <script>
+          var map = L.map('map').setView([${validTrips[0].latitude}, ${validTrips[0].longitude}], 2);
+          L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${accessToken}', {
+            maxZoom: 18,
+            tileSize: 512,
+            zoomOffset: -1,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+          }).addTo(map);
 
-    const url = `https://api.mapbox.com/styles/v1/mapbox/${style}/static/${markers}/${center},${zoom}/600x400?access_token=${accessToken}`;
+          ${markersJS}
+        </script>
+      </body>
+      </html>
+    `;
 
-    setStaticMapUrl(url);
+    setHtmlContent(html);
     setLoading(false);
   }, [trips]);
 
@@ -45,24 +69,27 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Міста майбутніх подорожей:</Text>
-      {validCities.length === 0 ? (
-        <Text style={{color: '#1B4965'}}>Немає міст з координатами</Text>
+      {htmlContent ? (
+        <WebView
+          originWhitelist={["*"]}
+          source={{ html: htmlContent }}
+          style={{ flex: 1 }}
+        />
       ) : (
-        <>
-          {validCities.map((trip, index) => (
-            <Text key={index}>{trip.city}</Text>
-          ))}
-          <Image source={{ uri: staticMapUrl }} style={styles.map} />
-        </>
+        <Text style={{ color: '#1B4965' }}>Немає міст з координатами</Text>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({ 
-  container: { flex: 1, paddingTop: 40, alignItems: 'center', backgroundColor: '#CAF0F8' },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#1B4965' },
-  map: { width: 350, height: 250, marginTop: 15, borderRadius: 10 },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#CAF0F8',
+  },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

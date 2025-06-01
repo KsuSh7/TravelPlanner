@@ -12,8 +12,11 @@ export default function FutureTrips() {
   const [userName, setUserName] = useState('');
   const [trips, setTrips] = useContext(TripsContext);
   const { token } = useContext(AuthContext);
-  const navigation = useNavigation();
+  const { setToken } = useContext(AuthContext); 
 
+  const navigation = useNavigation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [startDateObj, setStartDateObj] = useState(null); 
   const [isModalVisible, setModalVisible] = useState(false);
   const [tripName, setTripName] = useState('');
   const [tripDate, setTripDate] = useState('');
@@ -27,14 +30,14 @@ export default function FutureTrips() {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://192.168.31.55:5001/api/cities', {
+    fetch('http://192.168.1.162:5001/api/cities', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(setAllCities)
       .catch(err => console.error('Помилка при завантаженні міст:', err));
 
-    fetch('http://192.168.31.55:5001/api/users/me', {
+    fetch('http://192.168.1.162:5001/api/users/me', {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -44,7 +47,7 @@ export default function FutureTrips() {
       .then(data => setUserName(data.username))
       .catch(err => console.error('Помилка при завантаженні користувача:', err));
 
-    fetch('http://192.168.31.55:5001/api/trips', {
+    fetch('http://192.168.1.162:5001/api/trips', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -66,7 +69,7 @@ export default function FutureTrips() {
       trip_name: tripName
     };
 
-    fetch('http://192.168.31.55:5001/api/trips', {
+    fetch('http://192.168.1.162:5001/api/trips', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,11 +100,16 @@ export default function FutureTrips() {
   };
 
   const handleConfirmDate = (date) => {
-    const formatted = date.toISOString().split('T')[0];
-    if (isPickingStartDate) setTripDate(formatted);
-    else setTripEndDate(formatted);
-    setDatePickerVisible(false);
-  };
+  const formatted = date.toISOString().split('T')[0];
+  if (isPickingStartDate) {
+    setTripDate(formatted);
+    setStartDateObj(date); 
+  } else {
+    setTripEndDate(formatted);
+  }
+  setDatePickerVisible(false);
+};
+
 
   return (
     <View style={styles.container}>
@@ -111,12 +119,14 @@ export default function FutureTrips() {
       <FlatList
         data={trips}
         keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation.navigate('TripDetails', { trip: item })}>
             <View style={styles.tripItem}>
-              <Text style={styles.tripText}>
-                {item.city_name} — {item.start_date} - {item.end_date}
-              </Text>
+              <Text style={styles.tripText}>{item.trip_name}</Text>
+              <Text style={styles.dateText}>📍 {item.city_name}</Text>
+              <Text style={styles.dateText}>📅 {item.start_date} — {item.end_date}</Text>
+              <Text style={styles.budgetText}>💰 ₴{item.total_budget}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -144,6 +154,13 @@ export default function FutureTrips() {
               onChangeText={setBudget}
               keyboardType="numeric"
             />
+            <TextInput
+              style={styles.input}
+              placeholder="Пошук міста"
+              placeholderTextColor="#7B9EBF"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
             <Picker
               selectedValue={selectedCityId}
               onValueChange={(value) => setSelectedCityId(value)}
@@ -151,57 +168,59 @@ export default function FutureTrips() {
               itemStyle={styles.pickerItem}
             >
               <Picker.Item label="Оберіть місто" value={null} />
-              {allCities
-                .slice()
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map(city => (
-                  <Picker.Item key={city.id} label={city.name} value={city.id} />
-                ))
-              }
+              {allCities.filter(city =>city.name.toLowerCase().includes(searchQuery.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name)).map(city => (
+              <Picker.Item key={city.id} label={city.name} value={city.id} />
+                ))}
             </Picker>
 
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => {
-                setIsPickingStartDate(true);
-                setDatePickerVisible(true);
-              }}
-            >
-              <Text style={styles.dateButtonText}>
-                {tripDate ? `Дата початку: ${tripDate}` : 'Оберіть дату початку'}
-              </Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => {
+            setIsPickingStartDate(true);
+            setDatePickerVisible(true);
+          }}>
+          <Text style={styles.dateButtonText}>
+            {tripDate ? `Дата початку: ${tripDate}` : 'Оберіть дату початку'}
+          </Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => {
-                setIsPickingStartDate(false);
-                setDatePickerVisible(true);
-              }}
-            >
-              <Text style={styles.dateButtonText}>
-                {tripEndDate ? `Дата завершення: ${tripEndDate}` : 'Оберіть дату завершення'}
-              </Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => {
+            setIsPickingStartDate(false);
+            setDatePickerVisible(true);
+          }}
+        >
+          <Text style={styles.dateButtonText}>
+            {tripEndDate ? `Дата завершення: ${tripEndDate}` : 'Оберіть дату завершення'}
+          </Text>
+        </TouchableOpacity>
 
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleConfirmDate}
-              onCancel={() => setDatePickerVisible(false)}
-              textColor="#1B4965"
-            />
+        <DateTimePickerModal
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={handleConfirmDate}
+          onCancel={() => setDatePickerVisible(false)}
+          textColor="#1B4965"
+          minimumDate={isPickingStartDate ? undefined : startDateObj}
+        />
 
-            <TouchableOpacity style={styles.saveButton} onPress={addTrip}>
-              <Text style={styles.saveButtonText}>Зберегти подорож</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.cancelButtonText}>Закрити</Text>
-            </TouchableOpacity>
-          </View>
+        <TouchableOpacity style={styles.saveButton} onPress={addTrip}>
+          <Text style={styles.saveButtonText}>Зберегти подорож</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+          <Text style={styles.cancelButtonText}>Закрити</Text>
+        </TouchableOpacity>
         </View>
-      </Modal>
+      </View>
+    </Modal>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => setToken(null)}>
+        <Text style={styles.logoutText}>🚪 Вийти з профілю</Text>
+      </TouchableOpacity>
+
+
     </View>
   );
 }
@@ -210,13 +229,16 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#CAF0F8', alignItems: 'center', paddingTop: 60 },
   title: { fontSize: 24, fontWeight: 'bold', color: '#1B4965', marginBottom: 20 },
   greeting: { fontSize: 18, marginBottom: 10, color: '#1B4965' },
-  addButton: { backgroundColor: '#1B4965', padding: 15, width: '60%', borderRadius: 20, marginBottom: 20 },
+  listContent: {paddingHorizontal: 20,paddingBottom: 20,width: '100%',alignItems: 'center',},
+  tripItem: {width: '100%',maxWidth: 500,padding: 15,marginVertical: 8,backgroundColor: '#E0F7FF',borderRadius: 12,shadowColor: '#000',shadowOpacity: 0.1,shadowOffset: { width: 0, height: 2 },shadowRadius: 4,elevation: 3,},
+  tripText: { fontSize: 18, fontWeight: 'bold', color: '#1B4965' },
+  dateText: { fontSize: 14, color: '#5A5A5A', marginTop: 2 },
+  budgetText: { marginTop: 5, fontSize: 16, color: '#1B4965', fontWeight: '500' },
+  addButton: {backgroundColor: '#1B4965',padding: 15,width: '60%',borderRadius: 20,marginBottom: 20,},
   addButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
-  tripItem: { padding: 15, marginBottom: 10, backgroundColor: '#E0F7FF', borderRadius: 10, width: '80%', alignItems: 'center' },
-  tripText: { fontSize: 18, color: '#1B4965' },
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
   modalContent: { width: '85%', backgroundColor: '#fff', padding: 20, borderRadius: 10 },
-  input: { width: '100%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10, },
+  input: { width: '100%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10 },
   picker: { width: '100%', backgroundColor: '#E0F7FF', borderRadius: 10, marginVertical: 10, color: '#1B4965' },
   pickerItem: { color: '#1B4965' },
   dateButton: { backgroundColor: '#1B4965', padding: 10, borderRadius: 10, marginVertical: 10 },
@@ -224,5 +246,7 @@ const styles = StyleSheet.create({
   saveButton: { backgroundColor: '#1B4965', padding: 15, width: '100%', borderRadius: 20, marginTop: 20 },
   saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   cancelButton: { marginTop: 10, padding: 10, backgroundColor: '#E0F7FF', borderRadius: 10 },
-  cancelButtonText: { color: '#1B4965', textAlign: 'center' }
+  cancelButtonText: { color: '#1B4965', textAlign: 'center' },
+  logoutButton: {backgroundColor: '#FF6B6B',padding: 15,borderRadius: 20,width: '60%',marginBottom: 20,alignItems: 'center',},
+logoutText: {color: '#fff',fontWeight: 'bold',fontSize: 16,},
 });

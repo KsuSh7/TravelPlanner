@@ -25,7 +25,7 @@ export default function BottomTabs() {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'FutureTrips') {
+          if (route.name === 'Trips') {
             iconName = 'airplane-outline';
           } else if (route.name === 'Map') {
             iconName = 'map-outline';

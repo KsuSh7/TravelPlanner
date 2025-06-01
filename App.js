@@ -6,7 +6,6 @@ import SignUpScreen from './screen/SignUpScreen';
 import LoginScreen from './screen/LoginScreen';
 import MapScreen from './screen/MapScreen';
 import BottomTabs from './screen/BottomTabs';
-import ProfileScreen from './screen/ProfileScreen';
 import SpentScreen from './screen/SpentScreen';
 import { TripsProvider } from './screen/TripsContext';
 import { AuthProvider } from './screen/AuthContext';
@@ -37,7 +36,6 @@ export default function App() {
             <Stack.Screen name="SignUp" component={SignUpScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Map" component={MapScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Spent" component={SpentScreen} />
             <Stack.Screen name="MainTabs" component={BottomTabs} />
             <Stack.Screen name="TripDetails" component={TripDetailsScreen} />

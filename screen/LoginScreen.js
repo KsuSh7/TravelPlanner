@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.31.55:5001/api/login', {
+      const response = await fetch('http://192.168.1.162:5001/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -49,13 +49,13 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleTop}>Login to continue</Text>
+      <Text style={styles.titleTop}>Ввійдіть,щоб продовжити </Text>
       <Image source={require('../assets/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Log In</Text>
+      <Text style={styles.title}>Вхід</Text>
 
       <TextInput 
         style={styles.input} 
-        placeholder="Email" 
+        placeholder="Електронна адреса" 
         autoCapitalize="none"
         keyboardType="email-address"
         autoCorrect={false}
@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation }) {
       />
       <TextInput 
         style={styles.input} 
-        placeholder="Password" 
+        placeholder="Пароль" 
         secureTextEntry 
         placeholderTextColor="#94D2FF"
         value={password}
@@ -73,23 +73,20 @@ export default function LoginScreen({ navigation }) {
       />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={styles.buttonText}>Вхід</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity>
-        <Text style={styles.footerText}>Forgot Password?</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#CAF0F8', alignItems: 'center', paddingTop: 60 },
-  titleTop: { fontSize: 18, color: '#1B4965', marginBottom: 10 },
+  titleTop: { fontSize: 18, fontFamily: 'Poppins-Bold',color: '#1B4965', marginBottom: 10 },
   logo: { width: 250, height: 200, marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: 'bold', color: '#1B4965', marginBottom: 20 },
+  title: {fontFamily: 'Poppins-Bold', fontSize: 26, color: '#1B4965', marginBottom: 20 },
   input: { width: '80%', backgroundColor: '#E0F7FF', padding: 10, marginVertical: 10, borderRadius: 10 },
   button: { backgroundColor: '#1B4965', padding: 15, width: '60%', borderRadius: 20, marginTop: 20 },
-  buttonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
+  buttonText: { color: '#fff', textAlign: 'center', fontFamily: 'Poppins-Bold',},
   footerText: { marginTop: 20, color: '#1B4965' }
 });

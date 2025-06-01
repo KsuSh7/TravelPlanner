@@ -6,105 +6,110 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { BarChart } from 'react-native-chart-kit';
 
-export default function SpentScreen() {
+export default function TripBudgetCalculator() {
   const [budget, setBudget] = useState('');
   const [budgetSet, setBudgetSet] = useState(false);
-  const [expenseName, setExpenseName] = useState('');
-  const [expenseAmount, setExpenseAmount] = useState('');
-  const [expenses, setExpenses] = useState([]);
+  const [itemName, setItemName] = useState('');
+  const [itemCost, setItemCost] = useState('');
+  const [items, setItems] = useState([]);
 
-  const addExpense = () => {
-    if (!expenseName || !expenseAmount) return;
+  const addItem = () => {
+    if (!itemName || !itemCost) return;
 
-    const newExpense = {
-      id: Date.now().toString(),  // унікальний id
-      name: expenseName,
-      amount: parseFloat(expenseAmount),
+    const newItem = {
+      id: Date.now().toString(),
+      name: itemName,
+      cost: parseFloat(itemCost),
     };
 
-    setExpenses([...expenses, newExpense]);
-    setExpenseName('');
-    setExpenseAmount('');
+    setItems([...items, newItem]);
+    setItemName('');
+    setItemCost('');
   };
 
-  const deleteExpense = (id) => {
-    setExpenses(expenses.filter((item) => item.id !== id));
+  const deleteItem = (id) => {
+    setItems(items.filter((item) => item.id !== id));
   };
 
-  const getTotalSpent = () =>
-    expenses.reduce((total, item) => total + item.amount, 0);
-
-  const getRemaining = () =>
-    parseFloat(budget) - getTotalSpent();
+  const totalCost = items.reduce((sum, i) => sum + i.cost, 0);
+  const remaining = parseFloat(budget) - totalCost;
+  const percentUsed = budget ? Math.min((totalCost / parseFloat(budget)) * 100, 100).toFixed(1) : 0;
 
   const chartData = {
-    labels: expenses.map((e) => e.name.length > 6 ? e.name.slice(0, 6) + '…' : e.name),
-    datasets: [
-      {
-        data: expenses.map((e) => e.amount),
-      },
-    ],
+    labels: items.map((i) => i.name.length > 6 ? i.name.slice(0, 6) + '…' : i.name),
+    datasets: [{ data: items.map((i) => i.cost) }],
   };
 
   return (
     <View style={styles.container}>
       {!budgetSet ? (
         <>
-          <Text style={styles.title}>🎯 Введіть свій бюджет</Text>
+          <Text style={styles.title}>✈️ Бюджет подорожі</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={budget}
             onChangeText={setBudget}
-            placeholder="Ваш бюджет ₴"
+            placeholder="Введіть загальний бюджет"
             placeholderTextColor="#7B9EBF"
           />
-          <Button title="Зберегти бюджет" onPress={() => setBudgetSet(true)} />
+          <TouchableOpacity
+            style={styles.Addbutton}onPress={() => {const numericBudget = parseFloat(budget);if (isNaN(numericBudget) || numericBudget <= 0) {alert('Будь ласка, введіть коректний бюджет більше нуля');
+              return;
+              }
+                setBudgetSet(true);
+            }}
+              >
+            <Text style={styles.buttonText}>Почати розрахунок</Text>
+        </TouchableOpacity>
         </>
       ) : (
         <>
-          <Text style={styles.title}>Ваш бюджет: ₴{budget}</Text>
-          <Text style={[styles.subtitle, { color: getRemaining() >= 0 ? 'green' : 'red' }]}>
-            Залишилось: ₴{getRemaining().toFixed(2)}
+          <Text style={styles.title}>💰 Бюджет: ₴{budget}</Text>
+          <Text style={[styles.subtitle, { color: remaining >= 0 ? 'green' : 'red' }]}>
+            Залишилось: ₴{remaining.toFixed(2)} ({percentUsed}% використано)
           </Text>
 
-          <Text style={styles.sectionTitle}>➕ Додати витрату</Text>
+          
+
           <TextInput
             style={styles.input}
-            value={expenseName}
-            onChangeText={setExpenseName}
-            placeholder="Назва витрати"
+            value={itemName}
+            onChangeText={setItemName}
+            placeholder="Тип витрати (наприклад, Готель)"
             placeholderTextColor="#7B9EBF"
           />
           <TextInput
             style={styles.input}
             keyboardType="numeric"
-            value={expenseAmount}
-            onChangeText={setExpenseAmount}
-            placeholder="Сума витрати"
+            value={itemCost}
+            onChangeText={setItemCost}
+            placeholder="Сума"
             placeholderTextColor="#7B9EBF"
           />
-          <Button title="Додати" onPress={addExpense} />
+          <TouchableOpacity style={styles.Addbutton} onPress={addItem}>
+            <Text style={styles.buttonText}>Додати витрату</Text>
+          </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>📋 Витрати:</Text>
+          <Text style={styles.sectionTitle}>🧾 Очікувані витрати:</Text>
           <FlatList
-            data={expenses}
+            data={items}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <View style={styles.expenseItem}>
                 <Text style={styles.expenseText}>
-                  <Ionicons name="wallet-outline" size={18} /> {item.name}: ₴{item.amount.toFixed(2)}
+                  <Ionicons name="wallet-outline" size={18} /> {item.name}: ₴{item.cost.toFixed(2)}
                 </Text>
-                <TouchableOpacity onPress={() => deleteExpense(item.id)}>
+                <TouchableOpacity onPress={() => deleteItem(item.id)}>
                   <Ionicons name="trash-outline" size={22} color="red" />
                 </TouchableOpacity>
               </View>
             )}
           />
 
-          {expenses.length > 0 && (
+          {items.length > 0 && (
             <>
-              <Text style={styles.sectionTitle}>📊 Графік витрат:</Text>
+              <Text style={styles.sectionTitle}>📊 Діаграма витрат:</Text>
               <BarChart
                 data={chartData}
                 width={Dimensions.get('window').width - 40}
@@ -116,7 +121,7 @@ export default function SpentScreen() {
                   backgroundGradientTo: '#f7f7f7',
                   decimalPlaces: 2,
                   color: (opacity = 1) => `rgba(34, 128, 176, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: () => '#1B4965',
                   style: { borderRadius: 16 },
                 }}
                 style={{ marginVertical: 8, borderRadius: 16 }}
@@ -131,16 +136,15 @@ export default function SpentScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#CAF0F8', alignItems: 'center', paddingTop: 60 },
+  Addbutton:{backgroundColor: '#1B4965', padding: 12, borderRadius: 15, marginTop: 20 },
+  buttonText:{color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   title: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#1B4965',
-    marginBottom: 20,
+    fontSize: 26,fontWeight: 'bold',color: '#1B4965', marginBottom: 15,
   },
-  subtitle: { fontSize: 18, marginBottom: 10 },
+  subtitle: { fontSize: 16, marginBottom: 10 },
   sectionTitle: { marginTop: 20, fontSize: 18, fontWeight: '600', color: '#1B4965' },
-  input: { borderWidth: 1, padding: 8, marginVertical: 5, borderRadius: 5, width: '90%', color: '#000' },
+  input: {borderWidth: 1,padding: 10,marginVertical: 5,borderRadius: 8,width: '90%',color: '#000',backgroundColor: '#fff',borderColor: '#90E0EF',
+  },
   expenseItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
