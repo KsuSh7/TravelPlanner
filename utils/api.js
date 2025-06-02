@@ -1,4 +1,4 @@
-const API_URL = 'http://192.168.31.55:5001/api';  // додай /api сюди
+const API_URL = 'http://192.168.1.162:5001/api';  // додай /api сюди
 
 export async function loginUser(email, password) {
   const res = await fetch(`${API_URL}/login`, {
