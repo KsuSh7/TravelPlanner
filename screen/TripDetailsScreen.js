@@ -22,7 +22,7 @@ export default function TripDetailsScreen({ route }) {
         if (!token) return;
 
         try {
-        const response = await fetch(`http://192.168.31.55:5001/api/trips/${trip.id}/expenses`, {
+        const response = await fetch(`http://192.168.1.162:5001/api/trips/${trip.id}/expenses`, {
         headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) {
@@ -44,7 +44,7 @@ export default function TripDetailsScreen({ route }) {
         }
 
         try {
-        const response = await fetch(`http://192.168.31.55:5001/api/trips/${trip.id}/expenses`, {
+        const response = await fetch(`http://192.168.1.162:5001/api/trips/${trip.id}/expenses`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

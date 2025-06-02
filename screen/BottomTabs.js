@@ -11,9 +11,9 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); 
 function FutureTripsStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="FutureTrips" component={FutureTrips} options={{ title: 'Майбутні подорожі' }} />
-      <Stack.Screen name="TripDetails" component={TripDetailsScreen} options={{ title: 'Деталі подорожі' }} />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="FutureTrips" component={FutureTrips} />
+      <Stack.Screen name="TripDetails" component={TripDetailsScreen}  />
     </Stack.Navigator>
   );
 }
@@ -21,28 +21,34 @@ export default function BottomTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: true,
+        headerShown: true, 
+        headerStyle: {
+      backgroundColor: '#1B4965', },
+      headerTintColor: '#FFFFFF',
+        tabBarStyle: {
+      backgroundColor: '#1B4965',  
+    },
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          if (route.name === 'Trips') {
+          if (route.name === 'Подорожі') {
             iconName = 'airplane-outline';
-          } else if (route.name === 'Map') {
+          } else if (route.name === 'Карта') {
             iconName = 'map-outline';
-          }else if (route.name=='Spent'){
+          }else if (route.name=='Калькулятор витрат'){
             iconName='cash-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#2f95dc',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: '#FF6B6B',
+        tabBarInactiveTintColor: '#CAF0F8',
       })}
     >
-       <Tab.Screen name="Trips" component={FutureTripsStack} />
+       <Tab.Screen  name="Подорожі" component={FutureTripsStack} />
      
       
-      <Tab.Screen name="Map" component={MapScreen} />
-      <Tab.Screen name="Spent" component={SpentScreen} />
+      <Tab.Screen name="Карта" component={MapScreen} />
+      <Tab.Screen name="Калькулятор витрат" component={SpentScreen} />
 
     </Tab.Navigator>
   );

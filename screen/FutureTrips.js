@@ -29,14 +29,14 @@ export default function FutureTrips() {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://192.168.31.55:5001/api/cities', {
+    fetch('http://192.168.1.162:5001/api/cities', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(setAllCities)
       .catch(err => console.error('Помилка при завантаженні міст:', err));
 
-    fetch('http://192.168.31.55:5001/api/users/me', {
+    fetch('http://192.168.1.162:5001/api/users/me', {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -46,7 +46,7 @@ export default function FutureTrips() {
       .then(data => setUserName(data.username))
       .catch(err => console.error('Помилка при завантаженні користувача:', err));
 
-    fetch('http://192.168.31.55:5001/api/trips', {
+    fetch('http://192.168.1.162:5001/api/trips', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -68,7 +68,7 @@ export default function FutureTrips() {
       trip_name: tripName
     };
 
-    fetch('http://192.168.31.55:5001/api/trips', {
+    fetch('http://192.168.1.162:5001/api/trips', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
