@@ -7,6 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { TripsContext } from './TripsContext';
 import { AuthContext } from './AuthContext';
+import { API_URL } from "../utils/api.js";
 
 export default function FutureTrips() {
   const [userName, setUserName] = useState('');
@@ -29,14 +30,14 @@ export default function FutureTrips() {
   useEffect(() => {
     if (!token) return;
 
-    fetch('http://192.168.1.162:5001/api/cities', {
+    fetch(`${API_URL}/cities`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(setAllCities)
       .catch(err => console.error('Помилка при завантаженні міст:', err));
 
-    fetch('http://192.168.1.162:5001/api/users/me', {
+    fetch(`${API_URL}/users/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -46,7 +47,7 @@ export default function FutureTrips() {
       .then(data => setUserName(data.username))
       .catch(err => console.error('Помилка при завантаженні користувача:', err));
 
-    fetch('http://192.168.1.162:5001/api/trips', {
+    fetch(`${API_URL}/trips`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -68,7 +69,7 @@ export default function FutureTrips() {
       trip_name: tripName
     };
 
-    fetch('http://192.168.1.162:5001/api/trips', {
+    fetch(`${API_URL}/trips`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

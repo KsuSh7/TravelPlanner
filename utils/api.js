@@ -1,4 +1,4 @@
-const API_URL = 'http://192.168.1.162:5001/api';  // додай /api сюди
+export const API_URL = `http://192.168.55.102:5001/api`;
 
 export async function loginUser(email, password) {
   const res = await fetch(`${API_URL}/login`, {
@@ -39,7 +39,7 @@ export async function registerUser(username, email, password) {
         return data;
       }
   
-      return data; // { token: "..." }
+      return data;
     } catch (error) {
       throw new Error(error.message || 'Unexpected error');
     }

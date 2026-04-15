@@ -18,13 +18,8 @@ jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
 with app.app_context():
-    # Імпортуємо моделі, щоб Flask-Migrate їх побачив
     from models import User, Trip
 
-    # Не викликаємо db.create_all(), бо міграції керують схемою
-    # db.create_all()
-
-    # Імпортуємо blueprint-и після ініціалізації app та db
     from routes.auth import auth_bp
     from routes.trips import trips_bp
     from routes.trips import cities_bp

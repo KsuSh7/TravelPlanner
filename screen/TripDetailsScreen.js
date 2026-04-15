@@ -3,6 +3,7 @@ import {
     View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert
 } from 'react-native';
 import { AuthContext } from './AuthContext';
+import { API_URL } from "../utils/api.js";
 
 export default function TripDetailsScreen({ route }) {
     const { trip } = route.params;
@@ -22,7 +23,7 @@ export default function TripDetailsScreen({ route }) {
         if (!token) return;
 
         try {
-        const response = await fetch(`http://192.168.1.162:5001/api/trips/${trip.id}/expenses`, {
+        const response = await fetch(`${API_URL}/trips/${trip.id}/expenses`, {
         headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) {
@@ -44,7 +45,7 @@ export default function TripDetailsScreen({ route }) {
         }
 
         try {
-        const response = await fetch(`http://192.168.1.162:5001/api/trips/${trip.id}/expenses`, {
+        const response = await fetch(`${API_URL}/trips/${trip.id}/expenses`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

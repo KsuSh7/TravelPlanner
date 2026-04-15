@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import User  # Імпортуй свою модель користувача
-from extensions import db  # Якщо ти виніс db у окремий файл
-# або просто: from app import db, якщо все в одному файлі
+from models import User
+from extensions import db
+
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/users')
 
