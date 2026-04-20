@@ -18,19 +18,21 @@ jwt = JWTManager(app)
 migrate = Migrate(app, db)
 
 with app.app_context():
-    from models import User, Trip
+    from models import User, Trip, Place
 
     from routes.auth import auth_bp
     from routes.trips import trips_bp
     from routes.trips import cities_bp
     from routes.users import users_bp
     from routes.expenses import expenses_bp
+    from routes.recommend import recommend_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(trips_bp)
     app.register_blueprint(cities_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(expenses_bp)
+    app.register_blueprint(recommend_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
