@@ -45,6 +45,12 @@ class City(db.Model):
     name = db.Column(db.String(50))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    places_loaded = db.Column(db.Boolean, default=False)
+    places = db.relationship(
+        "Place",
+        backref="city",
+        lazy=True
+    )
 
 class Expense(db.Model):
     __tablename__ = 'expenses'
@@ -54,3 +60,31 @@ class Expense(db.Model):
     title = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     date_added = db.Column(db.Date, default=date.today)
+
+class Place(db.Model):
+
+    __tablename__ = "places"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(200), nullable=False)
+
+    city_id = db.Column(
+        db.Integer,
+        db.ForeignKey("cities.id"),
+        nullable=False
+    )
+
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+
+    rating = db.Column(db.Float)
+
+    price_level = db.Column(db.String(20))
+
+    tags = db.Column(db.String(300))
+
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.now()
+    )
