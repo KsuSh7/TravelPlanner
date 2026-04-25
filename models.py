@@ -45,6 +45,7 @@ class City(db.Model):
     name = db.Column(db.String(50))
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
+    places_loaded = db.Column(db.Boolean, default=False)
     places = db.relationship(
         "Place",
         backref="city",
