@@ -1,29 +1,20 @@
-from openai import OpenAI
-
-
+import math
 def generate_ai_plan(user, route):
+    plan = []
 
-    client = OpenAI()
+    places_per_day = math.ceil(len(route) / 3) # тимчасово ділим на 3 - потім треба буде передавати кількість днів подорожі, і ділити на неї
 
-    places = [p.name for p in route]
+    day = i // places_per_day + 1
 
-    prompt = f"""
-You are a travel assistant.
 
-Create a {user['days']}-day itinerary in {user['destination']}.
+    for i, place in enumerate(route):
+        if i > 0 and i % places_per_day == 0:
+            day += 1
 
-Places:
-{places}
+        plan.append({
+            "day": day,
+            "place": place.name,
+            "description": f"Visit {place.name}"
+        })
 
-Travel style: {user['travel_type']}
-Pace: {user['pace']}
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return response.choices[0].message.content
+    return plan
