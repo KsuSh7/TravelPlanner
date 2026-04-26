@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 from models import Place, City
 from extensions import db
+from services.tag_mapper import normalize_tags
 
 load_dotenv()
 
@@ -52,6 +53,10 @@ def load_places_for_city(city):
         if exists:
             continue
 
+        raw_tags = ",".join(props.get("categories", []))
+
+        tags = normalize_tags(raw_tags)
+
         place = Place(
             name=name,
             city_id=city.id,
@@ -59,7 +64,7 @@ def load_places_for_city(city):
             longitude=coords[0],
             rating=props.get("rating") or 4.0,
             price_level="medium",
-            tags=",".join(props.get("categories", []))
+            tags=tags
         )
 
         db.session.add(place)
