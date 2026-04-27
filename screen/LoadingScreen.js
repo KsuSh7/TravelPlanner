@@ -1,0 +1,63 @@
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { useEffect } from "react";
+
+export default function LoadingScreen({ route, navigation }) {
+
+  useEffect(() => {
+    fetch("http://192.168.0.108:5001/recommend", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(route.params)
+    })
+      .then(res => res.json())
+      .then(data => {
+        navigation.replace("Result", { data });
+      });
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <ActivityIndicator size="large" color="#1B4965" />
+        <Text style={styles.title}>Створюємо маршрут...</Text>
+        <Text style={styles.subtitle}>
+          AI аналізує твої вподобання ✨
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#E3FDFD",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+
+  card: {
+    backgroundColor: "#fff",
+    padding: 30,
+    borderRadius: 20,
+    alignItems: "center",
+    elevation: 5,
+    width: "100%",
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#1B4965",
+    marginTop: 15,
+  },
+
+  subtitle: {
+    marginTop: 10,
+    color: "#5C677D",
+    textAlign: "center",
+  },
+});
