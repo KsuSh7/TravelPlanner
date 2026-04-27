@@ -36,5 +36,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-__pycache__/
+**/__pycache__/
 *.pyc
+!migrations/__pycache__/
