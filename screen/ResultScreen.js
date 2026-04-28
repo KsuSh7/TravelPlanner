@@ -8,7 +8,6 @@ export default function ResultScreen({ route }) {
 
       <Text style={styles.title}>🌍 Твій маршрут</Text>
 
-      {/* 📍 Місця */}
       <Text style={styles.subtitle}>Рекомендації</Text>
 
       {data.recommendations?.map((place, index) => (
@@ -18,7 +17,6 @@ export default function ResultScreen({ route }) {
         </View>
       ))}
 
-      {/* 🧭 Маршрут */}
       <Text style={styles.subtitle}>Маршрут</Text>
 
       {data.route?.map((place, index) => (
@@ -29,7 +27,6 @@ export default function ResultScreen({ route }) {
         </View>
       ))}
 
-      {/* 🤖 AI План */}
       <Text style={styles.subtitle}>AI План подорожі</Text>
 
       <View style={styles.card}>

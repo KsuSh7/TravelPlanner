@@ -12,6 +12,8 @@ import { AuthProvider } from './screen/AuthContext';
 import TripDetailsScreen from './screen/TripDetailsScreen';
 import { LogBox } from 'react-native';
 import QuestionScreen from './screen/QuestionScreen';
+import LoadingScreen from './screen/LoadingScreen';
+import ResultScreen from './screen/ResultScreen';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component',
@@ -41,7 +43,8 @@ export default function App() {
             <Stack.Screen name="MainTabs" component={BottomTabs} />
             <Stack.Screen name="TripDetails" component={TripDetailsScreen} />
             <Stack.Screen name="QuestionDetails" component={QuestionScreen} />
-            
+            <Stack.Screen name="Loading" component={LoadingScreen} />
+            <Stack.Screen name="Result" component={ResultScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </TripsProvider>

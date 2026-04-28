@@ -1,20 +1,37 @@
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { useEffect } from "react";
 
+
 export default function LoadingScreen({ route, navigation }) {
 
   useEffect(() => {
-    fetch("http://192.168.0.108:5001/recommend", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(route.params)
-    })
-      .then(res => res.json())
-      .then(data => {
+    const generate = async () => {
+      try {
+        const response = await fetch("http://192.168.0.108:5001/recommend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(route.params)
+        });
+
+        const data = await response.json();
+
         navigation.replace("Result", { data });
-      });
+
+      } catch (error) {
+        console.log("API error:", error);
+
+        navigation.replace("Result", {
+          data: {
+            error: true,
+            message: "Не вдалося згенерувати маршрут 😢"
+          }
+        });
+      }
+    };
+
+    generate();
   }, []);
 
   return (
