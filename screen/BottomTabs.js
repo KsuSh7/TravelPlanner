@@ -6,6 +6,7 @@ import FutureTrips from './FutureTrips';
 import SpentScreen from './SpentScreen';
 import TripDetailsScreen from './TripDetailsScreen';
 import MapScreen from './MapScreen';  
+import QuestionScreen from './QuestionScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); 
@@ -49,6 +50,7 @@ export default function BottomTabs() {
       
       <Tab.Screen name="Карта" component={MapScreen} />
       <Tab.Screen name="Калькулятор витрат" component={SpentScreen} />
+      <Tab.Screen name="Рекомандації" component={QuestionScreen}/>
 
     </Tab.Navigator>
   );
