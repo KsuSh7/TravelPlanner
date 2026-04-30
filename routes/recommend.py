@@ -14,14 +14,16 @@ def recommend_trip():
     profile = request.json
     city_id = profile.get("city_id")
 
+    print("CITY ID:", city_id)
+
     if not city_id:
-        return jsonify({
-            "error": "city_id is required"
-        }), 400
+        return jsonify({"error": "city_id is required"}), 400
 
     user_type = classify_user(profile)
 
     places = get_or_load_places(city_id)
+
+    print("PLACES FOUND:", len(places))
 
     if not places:
         return jsonify({
@@ -34,24 +36,18 @@ def recommend_trip():
         limit=10
     )
 
+    print("TOP PLACES:", len(top_places))
+
     if not top_places:
         return jsonify({
             "error": "No matching places found"
         }), 404
 
     route = build_route(top_places)
-
-    try:
-        plan = generate_ai_plan(profile, route)
-    except Exception:
-        plan = [
-            {
-                "day": i // 3 + 1,
-                "place": p.name,
-                "description": f"Visit {p.name}"
-            }
-            for i, p in enumerate(route)
-        ]
+    plan = generate_ai_plan(
+        {**profile, "user_type": user_type},
+        route
+    )
 
     return jsonify({
         "user_type": user_type,

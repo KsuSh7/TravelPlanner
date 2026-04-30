@@ -13,8 +13,6 @@ TAG_MAP = {
 
     "catering.restaurant": ["food"],
     "catering.restaurant.italian": ["food"],
-
-    "natural": ["nature"],
     "park": ["nature", "relax"],
 
     "tourism.attraction": ["photo_spot"],
@@ -24,7 +22,10 @@ TAG_MAP = {
 
     "entertainment": ["nightlife", "family"],
 
-    "tourism.sights.memorial": ["history"]
+    "tourism.sights.memorial": ["history"],
+    "catering.cafe": ["food"],
+    "leisure.park": ["nature", "relax"],
+    "natural": ["nature", "adventure"]
 }
 
 def normalize_tags(raw_tags):

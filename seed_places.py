@@ -3,32 +3,21 @@ from models import City
 from services.place_loader import load_places_for_city
 
 TOP_CITIES = [
-    # Europe
     "London", "Paris", "Rome", "Barcelona", "Madrid",
     "Amsterdam", "Berlin", "Munich", "Prague", "Vienna",
     "Budapest", "Athens", "Lisbon", "Porto", "Milan",
     "Venice", "Florence", "Naples", "Dublin", "Edinburgh",
     "Copenhagen", "Stockholm", "Oslo", "Helsinki",
     "Istanbul", "Warsaw", "Krakow", "Brussels", "Zurich", "Kyiv",
-
-    # Asia
     "Tokyo", "Kyoto", "Osaka", "Seoul", "Bangkok",
     "Singapore", "Hong Kong", "Dubai", "Abu Dhabi",
     "Bali", "Delhi", "Mumbai", "Kathmandu",
-
-    # North America
     "New York City", "Los Angeles", "San Francisco", "Miami",
     "Las Vegas", "Chicago", "Toronto", "Vancouver",
     "Mexico City",
-
-    # South America
     "Rio de Janeiro", "Sao Paulo", "Buenos Aires",
     "Lima", "Santiago",
-
-    # Africa
     "Cape Town", "Cairo", "Marrakesh", "Nairobi",
-
-    # Oceania
     "Sydney", "Melbourne", "Auckland"
 ]
 

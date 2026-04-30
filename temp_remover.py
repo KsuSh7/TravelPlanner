@@ -1,10 +1,14 @@
-import sqlite3
+from app import app
+from models import Place, City
+from extensions import db
 
-conn = sqlite3.connect('database.db')
-cursor = conn.cursor()
+with app.app_context():
+    Place.query.delete()
 
-cursor.execute("DROP TABLE IF EXISTS _alembic_tmp_trip")
-conn.commit()
-conn.close()
+    City.query.update({
+        City.places_loaded: False
+    })
 
-print("Тимчасова таблиця _alembic_tmp_trip видалена")
+    db.session.commit()
+
+print("Reset done")
