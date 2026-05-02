@@ -1,23 +1,48 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from models import Trip
 from services.user_profiling import classify_user
 from services.route_optimizer import build_route
 from services.ai_planner import generate_ai_plan
 from services.place_loader import get_or_load_places
 from services.recommender import get_best_places
+from services.trip_route_service import save_route_to_trip
+
 
 recommend_bp = Blueprint("recommend", __name__)
 
 
 @recommend_bp.route("/recommend", methods=["POST"])
+@jwt_required()
 def recommend_trip():
+    user_id = get_jwt_identity()
     profile = request.json
-    city_id = profile.get("city_id")
 
+    city_id = profile.get("city_id")
+    trip_id = profile.get("trip_id")
+
+    print("USER:", user_id)
     print("CITY ID:", city_id)
+    print("TRIP ID:", trip_id)
 
     if not city_id:
-        return jsonify({"error": "city_id is required"}), 400
+        return jsonify({
+            "error": "city_id is required"
+        }), 400
+
+    trip = None
+
+    if trip_id:
+        trip = Trip.query.filter_by(
+            id=trip_id,
+            user_id=user_id
+        ).first()
+
+        if not trip:
+            return jsonify({
+                "error": "Trip not found"
+            }), 404
 
     user_type = classify_user(profile)
 
@@ -44,10 +69,21 @@ def recommend_trip():
         }), 404
 
     route = build_route(top_places)
+
     plan = generate_ai_plan(
-        {**profile, "user_type": user_type},
+        {
+            **profile,
+            "user_type": user_type
+        },
         route
     )
+
+    if trip:
+        save_route_to_trip(
+            trip=trip,
+            plan=plan,
+            places=route
+        )
 
     return jsonify({
         "user_type": user_type,
@@ -63,4 +99,4 @@ def recommend_trip():
             for p in top_places
         ],
         "plan": plan
-    })
+    }), 200

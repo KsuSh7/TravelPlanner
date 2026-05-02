@@ -85,3 +85,29 @@ def get_cities():
             'longitude': c.longitude
         } for c in cities
     ])
+
+@trips_bp.route("/trips/<int:trip_id>/route", methods=["GET"])
+def get_trip_route(trip_id):
+    trip = Trip.query.get_or_404(trip_id)
+
+    route = []
+
+    for item in sorted(
+        trip.route,
+        key=lambda x: x.order_index
+    ):
+        route.append({
+            "day": item.day,
+            "time": item.visit_time,
+            "description": item.description,
+            "visited": item.visited,
+            "place": {
+                "id": item.place.id,
+                "name": item.place.name,
+                "latitude": item.place.latitude,
+                "longitude": item.place.longitude,
+                "tags": item.place.tags
+            }
+        })
+
+    return jsonify(route), 200

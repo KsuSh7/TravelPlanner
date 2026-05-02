@@ -44,6 +44,43 @@ class Trip(db.Model):
             raise ValueError("End date must be after start date")
         return end_date
 
+class TripPlace(db.Model):
+    __tablename__ = "trip_places"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    trip_id = db.Column(
+        db.Integer,
+        db.ForeignKey("trips.id"),
+        nullable=False
+    )
+
+    place_id = db.Column(
+        db.Integer,
+        db.ForeignKey("places.id"),
+        nullable=False
+    )
+
+    day = db.Column(db.Integer, nullable=False)
+    visit_time = db.Column(db.String(10))
+    description = db.Column(db.Text)
+    order_index = db.Column(db.Integer)
+    visited = db.Column(db.Boolean, default=False)
+
+    trip = db.relationship(
+        "Trip",
+        backref=db.backref(
+            "route",
+            cascade="all, delete-orphan",
+            lazy=True
+        )
+    )
+
+    place = db.relationship(
+        "Place",
+        backref="trip_places"
+    )
+    
 class City(db.Model):
     __tablename__ = 'cities'
 
