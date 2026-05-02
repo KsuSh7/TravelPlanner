@@ -4,6 +4,7 @@ from extensions import db, bcrypt
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -26,6 +27,7 @@ with app.app_context():
     from routes.users import users_bp
     from routes.expenses import expenses_bp
     from routes.recommend import recommend_bp
+    from routes.profile import profile_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(trips_bp)
@@ -33,6 +35,7 @@ with app.app_context():
     app.register_blueprint(users_bp)
     app.register_blueprint(expenses_bp)
     app.register_blueprint(recommend_bp)
+    app.register_blueprint(profile_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
