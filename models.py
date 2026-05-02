@@ -9,8 +9,14 @@ class User(db.Model):
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-
     trips = db.relationship('Trip', backref='user', lazy=True, cascade="all, delete-orphan")
+    age = db.Column(db.Integer)
+    travel_type = db.Column(db.String(50))
+    pace = db.Column(db.String(50))
+    budget = db.Column(db.String(50))
+    interests = db.Column(db.Text)
+    preferred_tags = db.Column(db.Text)
+    bio = db.Column(db.Text)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -46,6 +52,7 @@ class City(db.Model):
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
     places_loaded = db.Column(db.Boolean, default=False)
+    tags = db.Column(db.String(255))
     places = db.relationship(
         "Place",
         backref="city",
