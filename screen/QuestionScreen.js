@@ -16,7 +16,6 @@ export default function QuestionScreen({ navigation }) {
   const [budget, setBudget] = useState("medium");
   const [travelType, setTravelType] = useState("solo");
 
-  const [age, setAge] = useState("");
   const [days, setDays] = useState("");
   const [pace, setPace] = useState("medium");
 
@@ -45,13 +44,11 @@ export default function QuestionScreen({ navigation }) {
 
   const submit = () => {
     if (!selectedCityId) return Alert.alert("Помилка", "Оберіть місто");
-    if (!age || !days) return Alert.alert("Помилка", "Заповніть вік і дні");
     if (interests.length === 0) return Alert.alert("Помилка", "Оберіть інтереси");
 
     const payload = {
       city_id: selectedCityId,
       city_name: selectedCity?.name,
-      age: Number(age),
       budget,
       travel_type: travelType,
       interests,
@@ -91,16 +88,11 @@ export default function QuestionScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
 
-      <Text style={styles.title}>Обери параметри для маршруту</Text>
+      <Text style={styles.title}>Обери місто та параметри для маршруту</Text>
+      <Text style={styles.helperText}>
+        Тут ми підберемо локації та маршрут усередині конкретного міста.
+      </Text>
 
-      <Text style={styles.subtitle}>Вік</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Наприклад: 20"
-        keyboardType="numeric"
-        value={age}
-        onChangeText={setAge}
-      />
 
       <Text style={styles.subtitle}>Кількість днів</Text>
       <TextInput
@@ -245,6 +237,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1B4965",
     marginBottom: 20,
+  },
+  helperText: {
+    color: "#5C677D",
+    marginBottom: 18,
+    lineHeight: 20,
   },
 
   subtitle: {

@@ -7,6 +7,7 @@ import SpentScreen from './SpentScreen';
 import TripDetailsScreen from './TripDetailsScreen';
 import MapScreen from './MapScreen';  
 import QuestionScreen from './QuestionScreen';
+import ProfileScreen from './ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); 
@@ -15,6 +16,7 @@ function FutureTripsStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="FutureTrips" component={FutureTrips} />
       <Stack.Screen name="TripDetails" component={TripDetailsScreen}  />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );
 }

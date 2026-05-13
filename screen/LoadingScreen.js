@@ -7,7 +7,7 @@ export default function LoadingScreen({ route, navigation }) {
   useEffect(() => {
     const generate = async () => {
       try {
-        const response = await fetch("http://192.168.0.108:5001/recommend", {
+        const response = await fetch("http://172.20.10.3:5001/recommend", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
