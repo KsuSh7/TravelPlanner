@@ -114,7 +114,6 @@ def generate_ai_plan(user, route):
     time_slots = PACE_TIME_SLOTS.get(pace, PACE_TIME_SLOTS["medium"])
     places_per_day = max(get_places_per_day(user), math.ceil(len(route) / days))
 
-    # сортування по пріоритету
     route = sorted(route, key=get_priority_score)
 
     plan = []

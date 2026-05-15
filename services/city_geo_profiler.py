@@ -94,9 +94,6 @@ def extract_geo_tags(summary):
 
 
 def get_city_summary(city):
-    """
-    Пробує кілька варіантів пошуку у Wikipedia
-    """
 
     variants = [
         city.name,
@@ -128,9 +125,7 @@ def generate_geo_tags(city):
 
 
 def enrich_city(city):
-    """
-    Додає geo tags до існуючих travel tags
-    """
+
 
     existing_tags = set()
 

@@ -46,14 +46,10 @@ def recommend_trip():
 
     user_type = classify_user(profile)
 
+    print("START RECOMMEND")
+
     places = get_or_load_places(city_id)
-
-    print("PLACES FOUND:", len(places))
-
-    if not places:
-        return jsonify({
-            "error": "No places found for this city"
-        }), 404
+    print("PLACES LOADED:", len(places))
 
     top_places = get_best_places(
         places,
@@ -61,14 +57,11 @@ def recommend_trip():
         limit=10
     )
 
-    print("TOP PLACES:", len(top_places))
-
-    if not top_places:
-        return jsonify({
-            "error": "No matching places found"
-        }), 404
+    print("TOP PLACES READY")
 
     route = build_route(top_places)
+
+    print("ROUTE READY")
 
     plan = generate_ai_plan(
         {
@@ -77,6 +70,8 @@ def recommend_trip():
         },
         route
     )
+
+    print("PLAN READY")
 
     if trip:
         save_route_to_trip(

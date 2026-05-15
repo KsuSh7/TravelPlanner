@@ -8,30 +8,30 @@ export default function ResultScreen({ route }) {
 
       <Text style={styles.title}>🌍 Твій маршрут</Text>
 
-      <Text style={styles.subtitle}>Рекомендації</Text>
+      <Text style={styles.subtitle}>Рекомендовані місця</Text>
 
-      {data.recommendations?.map((place, index) => (
+      {data.places?.map((place, index) => (
         <View key={index} style={styles.card}>
           <Text style={styles.placeName}>{place.name}</Text>
-          <Text style={styles.placeCity}>{place.city}</Text>
+          <Text>{place.tags}</Text>
         </View>
       ))}
 
-      <Text style={styles.subtitle}>Маршрут</Text>
+      <Text style={styles.subtitle}>План подорожі</Text>
 
-      {data.route?.map((place, index) => (
-        <View key={index} style={styles.routeItem}>
-          <Text style={styles.routeText}>
-            {index + 1}. {place.name}
+      {data.plan?.map((item, index) => (
+        <View key={index} style={styles.card}>
+          <Text style={styles.placeName}>
+            День {item.day} • {item.time}
+          </Text>
+
+          <Text>{item.place}</Text>
+
+          <Text style={styles.planText}>
+            {item.description}
           </Text>
         </View>
       ))}
-
-      <Text style={styles.subtitle}>AI План подорожі</Text>
-
-      <View style={styles.card}>
-        <Text style={styles.planText}>{data.plan}</Text>
-      </View>
 
     </ScrollView>
   );

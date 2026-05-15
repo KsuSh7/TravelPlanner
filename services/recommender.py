@@ -74,14 +74,44 @@ def calculate_score(user, place):
     pace_match = match_pace(user, place)
 
     score = (
-        interest_match * 0.40 +
+        interest_match * 0.30 +
         rating_score * 0.25 +
         budget_match * 0.10 +
         travel_match * 0.10 +
-        pace_match * 0.15
+        pace_match * 0.15 +
+        diversity_bonus(place, []) * 0.10
     )
 
     return round(score, 3)
+
+
+def diversity_bonus(place, selected_places):
+    if not selected_places:
+        return 1
+
+    place_tags = set(place.tags.split(",")) if place.tags else set()
+
+    used_tags = set()
+
+    for p in selected_places:
+        if p.tags:
+            used_tags.update(
+                tag.strip()
+                for tag in p.tags.split(",")
+            )
+
+    repeated = len(place_tags.intersection(used_tags))
+
+    if repeated == 0:
+        return 1
+
+    if repeated == 1:
+        return 0.8
+
+    if repeated == 2:
+        return 0.6
+
+    return 0.4
 
 
 def get_best_places(places, user, limit=10):
@@ -89,11 +119,14 @@ def get_best_places(places, user, limit=10):
     remaining = places.copy()
 
     while remaining and len(selected) < limit:
+
         best = max(
             remaining,
-            key=lambda place:
-                calculate_score(user, place) * 0.85
+            key=lambda place: (
+                calculate_score(user, place) * 0.70
                 + match_distance(place, selected) * 0.15
+                + diversity_bonus(place, selected) * 0.15
+            )
         )
 
         selected.append(best)
