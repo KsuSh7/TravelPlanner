@@ -224,10 +224,12 @@ export default function FutureTrips() {
 
                 <TouchableOpacity
                   style={styles.recommendationButton}
-                  onPress={() => navigation.navigate('CreateTripFromRecommendation', {
-                    cityId: item.city_id,
-                    cityName: item.city_name,
-                  })}
+                  onPress={() => {
+                    setSelectedCityId(item.city_id);
+                    setSearchQuery(item.city_name);
+                    setTripName(`Подорож у ${item.city_name}`);
+                    setModalVisible(true);
+                  }}
                 >
                   <Text style={styles.recommendationButtonText}>Додати як подорож</Text>
                 </TouchableOpacity>

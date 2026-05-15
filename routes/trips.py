@@ -208,3 +208,25 @@ def get_trip_route(trip_id):
         })
 
     return jsonify(route), 200
+
+@trips_bp.route('/trips/<int:trip_id>', methods=['DELETE'])
+@jwt_required()
+def delete_trip(trip_id):
+    user_id = get_jwt_identity()
+
+    trip = Trip.query.filter_by(
+        id=trip_id,
+        user_id=user_id
+    ).first()
+
+    if not trip:
+        return jsonify({
+            "error": "Trip not found"
+        }), 404
+
+    db.session.delete(trip)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Trip deleted successfully"
+    }), 200
