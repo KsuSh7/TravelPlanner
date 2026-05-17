@@ -48,13 +48,14 @@ export default function LoadingScreen({ route, navigation }) {
             data: {
               error: true,
               message: data.error || "Помилка генерації маршруту"
-            }
+            },
+            requestData: route.params
           });
 
           return;
         }
 
-        navigation.replace("Result", { data });
+        navigation.replace("Result", { data, requestData: route.params });
 
       } catch (error) {
 
@@ -64,7 +65,8 @@ export default function LoadingScreen({ route, navigation }) {
           data: {
             error: true,
             message: "Не вдалося згенерувати маршрут 😢"
-          }
+          },
+          requestData: route.params
         });
       }
     };

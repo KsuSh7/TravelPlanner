@@ -184,8 +184,18 @@ def get_cities():
     ])
 
 @trips_bp.route("/trips/<int:trip_id>/route", methods=["GET"])
+@jwt_required()
 def get_trip_route(trip_id):
-    trip = Trip.query.get_or_404(trip_id)
+    user_id = get_jwt_identity()
+    trip = Trip.query.filter_by(
+        id=trip_id,
+        user_id=user_id
+    ).first()
+
+    if not trip:
+        return jsonify({
+            "error": "Trip not found"
+        }), 404
 
     route = []
 

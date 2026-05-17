@@ -14,6 +14,7 @@ import { LogBox } from 'react-native';
 import QuestionScreen from './screen/QuestionScreen';
 import LoadingScreen from './screen/LoadingScreen';
 import ResultScreen from './screen/ResultScreen';
+import CreateTripFromRouteScreen from './screen/CreateTripFromRouteScreen';
 
 LogBox.ignoreLogs([
   'Text strings must be rendered within a <Text> component',
@@ -45,6 +46,7 @@ export default function App() {
             <Stack.Screen name="QuestionDetails" component={QuestionScreen} />
             <Stack.Screen name="Loading" component={LoadingScreen} />
             <Stack.Screen name="Result" component={ResultScreen} />
+            <Stack.Screen name="CreateTripFromRoute" component={CreateTripFromRouteScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </TripsProvider>

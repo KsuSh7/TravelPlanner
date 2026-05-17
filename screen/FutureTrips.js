@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Modal
+  View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Modal, Alert
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -110,9 +110,25 @@ export default function FutureTrips() {
     loadWeather();
   }, [token, trips]);
 
-  const addTrip = () => {
+  const resetTripForm = () => {
+    setModalVisible(false);
+    setTripName('');
+    setTripDate('');
+    setTripEndDate('');
+    setBudget('');
+    setSearchQuery('');
+    setSelectedCityId(null);
+    setStartDateObj(null);
+  };
+
+  const addTrip = async () => {
     if (!token) {
       alert('Будь ласка, увійдіть в систему');
+      return;
+    }
+
+    if (!tripName.trim() || !tripDate || !tripEndDate || !budget.trim() || !selectedCityId) {
+      Alert.alert('Помилка', 'Заповни назву, місто, бюджет і дати подорожі');
       return;
     }
 
@@ -121,39 +137,31 @@ export default function FutureTrips() {
       start_date: tripDate,
       end_date: tripEndDate,
       total_budget: parseFloat(budget),
-      trip_name: tripName
+      trip_name: tripName.trim()
     };
 
-    fetch(`${API_URL}/trips`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newTripData),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`Server error: ${res.status} - ${text}`);
-        }
-        return res.json();
-      })
-      .then(() => {
-        loadTrips();
-        setModalVisible(false);
-        setTripName('');
-        setTripDate('');
-        setTripEndDate('');
-        setBudget('');
-        setSearchQuery('');
-        setSelectedCityId(null);
-        setStartDateObj(null);
-      })
-      .catch((err) => {
-        console.error(err);
-        alert('Не вдалося зберегти подорож. Спробуйте пізніше.');
+    try {
+      const response = await fetch(`${API_URL}/trips`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newTripData),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Не вдалося зберегти подорож');
+      }
+
+      loadTrips();
+      resetTripForm();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Не вдалося зберегти подорож. Спробуйте пізніше.');
+    }
   };
 
   const handleConfirmDate = (date) => {
@@ -166,6 +174,41 @@ export default function FutureTrips() {
   }
   setDatePickerVisible(false);
 };
+
+  const deleteTrip = (tripId) => {
+    if (!token) return;
+
+    Alert.alert(
+      'Видалити подорож',
+      'Ти впевнена, що хочеш видалити цю подорож?',
+      [
+        { text: 'Скасувати', style: 'cancel' },
+        {
+          text: 'Видалити',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const response = await fetch(`${API_URL}/trips/${tripId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.error || 'Не вдалося видалити подорож');
+              }
+
+              setTrips((prev) => prev.filter((trip) => trip.id !== tripId));
+            } catch (error) {
+              console.error('Помилка при видаленні подорожі:', error);
+              Alert.alert('Помилка', 'Не вдалося видалити подорож');
+            }
+          }
+        }
+      ]
+    );
+  };
 
 
   return (
@@ -236,14 +279,12 @@ export default function FutureTrips() {
               </View>
             ))}
 
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-              <Text style={styles.addButtonText}>+ Додати подорож</Text>
-            </TouchableOpacity>
           </>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('TripDetails', { trip: item })}>
             <View style={styles.tripItem}>
+              <TouchableOpacity onPress={() => navigation.navigate('TripDetails', { trip: item })}>
+              <View>
               <Text style={styles.tripText}>{item.trip_name}</Text>
               <Text style={styles.dateText}>📍 {item.city_name}</Text>
               <Text style={styles.dateText}>📅 {item.start_date} — {item.end_date}</Text>
@@ -253,8 +294,16 @@ export default function FutureTrips() {
                   ? `🌤 ${weatherByTrip[item.id].weather_label}: ${weatherByTrip[item.id].max_temp}°C / ${weatherByTrip[item.id].min_temp}°C`
                   : `🌦 ${weatherByTrip[item.id]?.message || 'Завантаження прогнозу...'}`}
               </Text>
+              </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.deleteTripButton}
+                onPress={() => deleteTrip(item.id)}
+              >
+                <Text style={styles.deleteTripButtonText}>Видалити</Text>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
         )}
       />
 
@@ -332,21 +381,27 @@ export default function FutureTrips() {
           <Text style={styles.saveButtonText}>Зберегти подорож</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
+        <TouchableOpacity style={styles.cancelButton} onPress={resetTripForm}>
           <Text style={styles.cancelButtonText}>Закрити</Text>
         </TouchableOpacity>
         </View>
       </View>
     </Modal>
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={() => {
-          logout();
-          navigation.navigate('Welcome');
-        }}
-      >
-        <Text style={styles.logoutText}>🚪 Вийти з профілю</Text>
-      </TouchableOpacity>
+      <View style={styles.bottomActions}>
+        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+          <Text style={styles.addButtonText}>+ Додати подорож</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => {
+            logout();
+            navigation.navigate('Welcome');
+          }}
+        >
+          <Text style={styles.logoutText}>🚪 Вийти з профілю</Text>
+        </TouchableOpacity>
+      </View>
 
 
     </View>
@@ -358,13 +413,16 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: 'bold', color: '#1B4965', marginBottom: 20 },
   greeting: { fontSize: 18, marginBottom: 10, color: '#1B4965' },
   tripsList: { width: '100%', flex: 1 },
-  listContent: {paddingHorizontal: 20,paddingBottom: 20,width: '100%',alignItems: 'center',},
+  listContent: {paddingHorizontal: 20,paddingBottom: 20,width: '100%',alignItems: 'center'},
   tripItem: {width: '100%',maxWidth: 500,padding: 15,marginVertical: 8,backgroundColor: '#E0F7FF',borderRadius: 12,shadowColor: '#000',shadowOpacity: 0.1,shadowOffset: { width: 0, height: 2 },shadowRadius: 4,elevation: 3,},
   tripText: { fontSize: 18, fontWeight: 'bold', color: '#1B4965' },
   dateText: { fontSize: 14, color: '#5A5A5A', marginTop: 2 },
   budgetText: { marginTop: 5, fontSize: 16, color: '#1B4965', fontWeight: '500' },
   weatherText: { marginTop: 6, fontSize: 14, color: '#0077B6' },
-  addButton: {backgroundColor: '#1B4965',padding: 15,width: '60%',borderRadius: 20,marginBottom: 20,},
+  deleteTripButton: { marginTop: 12, alignSelf: 'center', backgroundColor: '#FF6B6B', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
+  deleteTripButtonText: { color: '#fff', fontWeight: 'bold' },
+  bottomActions: { width: '100%', paddingHorizontal: 20, paddingBottom: 20 },
+  addButton: {backgroundColor: '#1B4965',padding: 15,width: '100%',borderRadius: 20,marginBottom: 12,alignItems: 'center'},
   addButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
   modalContent: { width: '85%', backgroundColor: '#fff', padding: 20, borderRadius: 10 },
@@ -377,7 +435,7 @@ const styles = StyleSheet.create({
   saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: 'bold' },
   cancelButton: { marginTop: 10, padding: 10, backgroundColor: '#E0F7FF', borderRadius: 10 },
   cancelButtonText: { color: '#1B4965', textAlign: 'center' },
-  logoutButton: {backgroundColor: '#FF6B6B',padding: 15,borderRadius: 20,width: '60%',marginBottom: 20,alignItems: 'center',},
+  logoutButton: {backgroundColor: '#FF6B6B',padding: 15,borderRadius: 20,width: '100%',alignItems: 'center',},
 logoutText: {color: '#fff',fontWeight: 'bold',fontSize: 16,},
 header: {
   width: '100%',
@@ -388,6 +446,8 @@ header: {
   marginBottom: 15,
 },
 sectionTitle: {
+  width: '100%',
+  textAlign: 'center',
   fontSize: 22,
   fontWeight: 'bold',
   color: '#1B4965',
@@ -397,6 +457,7 @@ sectionTitle: {
 
 recommendationCard: {
   width: '90%',
+  alignSelf: 'center',
   backgroundColor: '#E0F7FF',
   padding: 15,
   borderRadius: 15,
